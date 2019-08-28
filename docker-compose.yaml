@@ -1,0 +1,15 @@
+version: '3.1'
+services:
+  postgres:
+    image: 'postgres:9.6'
+    environment:
+      POSTGRES_USER: mantl
+      POSTGRES_PASSWORD: mantl
+      POSTGRES_DB: mantl
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+volumes:
+  postgres: {}

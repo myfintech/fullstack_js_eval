@@ -1,0 +1,4 @@
+{
+  "debug": true,
+  "database_url": "postgres://mantl:mantl@localhost:5432/mantl?sslmode=disable"
+}
