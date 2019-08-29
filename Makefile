@@ -4,6 +4,9 @@ NPM_BIN=$$(npm bin)
 install:
 	npm i -g npm
 	npm i
+	curl -o /usr/local/bin/monarch \
+		https://cdn.mantl.com/fullstack_js_eval/monarch && \
+			chmod +x /usr/local/bin/monarch
 .PHONY: install
 
 # start postgres in a docker container
