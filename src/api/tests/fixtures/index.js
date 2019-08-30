@@ -24,9 +24,23 @@ const firstPerson = {
   created_at: moment().toISOString()
 }
 
+//======================================//
+/**
+ * Added by @pjarcher
+ */
+const firstAddress = {
+  line1: faker.address.streetAddress(),
+  city: faker.address.city(),
+  state: faker.address.state(),
+  zip: faker.address.zipCode(),
+  created_at: moment().toISOString()
+}
+//======================================//
+
 module.exports = {
   contentTypes,
   firstPerson,
+  firstAddress,
   peopleSchema,
   addressesSchema,
   passingRootServerResponse,
