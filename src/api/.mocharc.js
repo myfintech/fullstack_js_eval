@@ -10,8 +10,8 @@ module.exports = {
   // colors: false,
   // reporter: 'nyan',
   reporter: 'list',
-  // bail: true,
-  exit: true,
+  bail: true,
+  // exit: true,
   // bail: 1, // exit after a single failed test
   // roots: [TEST_DIR],
   file: [

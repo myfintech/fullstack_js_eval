@@ -6,7 +6,7 @@ const database = knex({
     port: 5432,
     user: 'mantl',
     password: 'mantl',
-    hostname: 'localhost',
+    hostname: 'postgres',
     database: 'mantl'
   }
 })

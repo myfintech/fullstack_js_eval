@@ -2,14 +2,35 @@ version: '3.1'
 services:
   postgres:
     image: 'postgres:9.6'
-    environment:
-      POSTGRES_USER: mantl
-      POSTGRES_PASSWORD: mantl
-      POSTGRES_DB: mantl
+
+    env_file:
+      - .env
+
     ports:
       - 5432:5432
+
     volumes:
       - postgres:/var/lib/postgresql/data
+
+  test:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+
+    command: make server.test.watch
+
+    depends_on:
+      - postgres
+
+    env_file:
+      - .env
+
+    volumes:
+      - ./Makefile:/opt/app/Makefile
+      - ./package.json:/opt/app/package.json
+      - ./package-lock.json:/opt/app/package-lock.json
+      - ./.monarch.default.json:/opt/app/.monarch.default.json
+      - ./src:/opt/app/src
 
 volumes:
   postgres: {}

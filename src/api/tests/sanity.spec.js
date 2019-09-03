@@ -1,6 +1,12 @@
 const fixtures = require('./fixtures')
+const { execSync } = require('child_process')
 const httpStatusCodes = require('../lib/httpStatusCodes')
 const { client } = require('./setup/supertestServer')
+
+before(async () => {
+  // reset the database before every run
+  execSync('/usr/bin/make postgres.reset')
+})
 
 describe('Sanity Check', () => {
   it('GET / should return a 200', async () => {
