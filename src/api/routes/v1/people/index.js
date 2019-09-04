@@ -3,13 +3,6 @@ const httpErrorMessages = require('../../../lib/httpErrorMessages')
 const { database } = require('../../../lib/database')
 const moment = require('moment')
 
-// Pre-declarations for vars used to store request info
-let FULL_URL = ''
-let REQ_PATH = ''
-let REQ_PARAMS = ''
-let PERSON_ID = ''
-let ADDRESS_ID = ''
-
 module.exports = (api) => {
   /**
    * POST /v1/people
@@ -17,16 +10,6 @@ module.exports = (api) => {
    */
   api.post('/', async (req, res, next) => {
     try {
-      // Get, update, and log new request info
-      processNewReqInfo(
-        req.protocol,
-        req.get('host'),
-        req.originalUrl,
-        req.path,
-        req.params,
-        req.params.personID,
-        req.params.addressID
-      )
       // Get new person info from request body
       const newPerson = req.body
       // Attempt to insert new person info into database
@@ -53,41 +36,33 @@ module.exports = (api) => {
    */
   api.get('/:personID', async (req, res) => {
     try {
-      // Get, update, and log new request info
-      processNewReqInfo(
-        req.protocol,
-        req.get('host'),
-        req.originalUrl,
-        req.path,
-        req.params,
-        req.params.personID,
-        req.params.addressID
-      )
       /**
-       * Attempt to get person object from database using id.
+       * Attempt to get person record from database using id.
        * Catch case when no record in database.
        */
       const retrievedPerson = await database('people')
         .first('*')
         .where({
-          id: PERSON_ID
+          id: req.params.personID
         })
         .whereNull('deleted_at')
       /**
-       * If no person with that id exists in database, return 404 not found.
-       * Else return found person object and 200 status code.
+       * If no person record with the specified personID exists in database,
+       * respond with error object and 404 status code.
+       * Else respond with found person record as object and 200 status code.
        */
-      if (typeof retrievedPerson !== 'undefined') {
-        // Respond with person record of given id that was retrieved from database
-        res
-          .status(statusCodes.OK)
-          .json(retrievedPerson)
-      } else {
-        // Respond with empty object because no person record corresponding to given id was found in database
+      if (!retrievedPerson) {
+        // Respond with empty object because no record found
         res
           .status(statusCodes.NotFound)
-          .json({})
+          .json({
+            error: `No record found for specified personID<${req.params.personID}>.`
+          })
       }
+      // Respond with person record of given id that was retrieved from database
+      res
+        .status(statusCodes.OK)
+        .json(retrievedPerson)
     } catch (err) {
       // Log error for debugging; respond with error and 400 status code
       console.log(err)
@@ -105,21 +80,14 @@ module.exports = (api) => {
    */
   api.get('/', async (req, res) => {
     try {
-      // Get, update, and log new request info
-      processNewReqInfo(
-        req.protocol,
-        req.get('host'),
-        req.originalUrl,
-        req.path,
-        req.params,
-        req.params.personID,
-        req.params.addressID
-      )
       // Get list of all people records in database
       const listOfPeople = await database()
         .select('*')
         .from('people')
-      // Respond with list of all people objects stored in database
+      /**
+       * Respond with list of all people records stored in database.
+       * If no records found, response will be an empty array.
+       */
       res
         .status(statusCodes.OK)
         .json(listOfPeople)
@@ -147,23 +115,13 @@ module.exports = (api) => {
    **/
   api.post('/:personID/addresses', async (req, res) => {
     try {
-      // Get, update, and log new request info
-      processNewReqInfo(
-        req.protocol,
-        req.get('host'),
-        req.originalUrl,
-        req.path,
-        req.params,
-        req.params.personID,
-        req.params.addressID
-      )
       // Retrieve new address info from request body
       const newAddress = req.body
-      // Attempt to insert new address info into database
+      // Attempt to insert new address record into database
       const [insertedRecord] = await database('addresses')
         .insert(newAddress)
         .returning('*')
-      // Respond with address record (which is an array of objects) corresponding to given personID
+      // Respond with inserted address record (which is an array of objects) corresponding to given personID
       res
         .status(statusCodes.OK)
         .json(insertedRecord)
@@ -184,39 +142,34 @@ module.exports = (api) => {
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
     try {
-      // Get, update, and log new request info
-      processNewReqInfo(
-        req.protocol,
-        req.get('host'),
-        req.originalUrl,
-        req.path,
-        req.params,
-        req.params.personID,
-        req.params.addressID
-      )
-      // Attempt to get address object from database
+      /**
+       * Attempt to get address object from database.
+       * Catch case where record doesn't exist.
+       */
       const retrievedAddress = await database('addresses')
         .first('*')
         .where({
-          id: ADDRESS_ID,
-          person_id: PERSON_ID
+          id: req.params.addressID,
+          person_id: req.params.personID
         })
         .whereNull('deleted_at')
       /**
-       * If no person or address with specified ids exist in database, return empty object and 404 status code.
-       * Else return found address object and 200 status code.
+       * If no address record with the specified IDs exists in database,
+       * respond with error object and 404 status code.
+       * Else respond with record as object and 200 status code.
        */
-      if (typeof retrievedAddress !== 'undefined' || typeof retrievedAddress.person_id !== 'undefined') {
-        // Respond with address object corresponding to given addressID and personID
-        res
-          .status(statusCodes.OK)
-          .json(retrievedAddress)
-      } else {
+      if (!retrievedAddress) {
         // Respond with empty object because no record found
         res
           .status(statusCodes.NotFound)
-          .json({})
+          .json({
+            error: `No record found for specified personID<${req.params.personID}> addressID<${req.params.addressID}>.`
+          })
       }
+      // Respond with address object corresponding to given addressID and personID
+      res
+        .status(statusCodes.OK)
+        .json(retrievedAddress)
     } catch (err) {
       // Log error for debugging; respond with error and 400 status code
       console.log(err)
@@ -234,24 +187,27 @@ module.exports = (api) => {
    **/
   api.get('/:personID/addresses', async (req, res) => {
     try {
-      // Get, update, and log new request info
-      processNewReqInfo(
-        req.protocol,
-        req.get('host'),
-        req.originalUrl,
-        req.path,
-        req.params,
-        req.params.personID,
-        req.params.addressID
-      )
       // Get list of all addresses corresponding to specified personID
       const listOfAddresses = await database('addresses')
         .select('*')
         .where({
-          person_id: PERSON_ID
+          person_id: req.params.personID
         })
         .whereNull('deleted_at')
-      // Respond with all address records contained in database corresponding to given personID
+      /**
+       * If no address record with the specified personID exists in database,
+       * respond with error object and 404 status code.
+       * Else respond with found address record as object and 200 status code.
+       */
+      if (!listOfAddresses) {
+        // Respond with empty object because no record found
+        res
+          .status(statusCodes.NotFound)
+          .json({
+            error: `No record found for specified personID<${req.params.personID}>.`
+          })
+      }
+      // Respond with all address records contained in database corresponding to given personID as an array of objects
       res
         .status(statusCodes.OK)
         .json(listOfAddresses)
@@ -275,29 +231,33 @@ module.exports = (api) => {
    **/
   api.delete('/:personID/addresses/:addressID', async (req, res) => {
     try {
-      // Get, update, and log new request info
-      processNewReqInfo(
-        req.protocol,
-        req.get('host'),
-        req.originalUrl,
-        req.path,
-        req.params,
-        req.params.personID,
-        req.params.addressID
-      )
       /**
        * Set deleted_at key to current timestamp (originally NULL).
        * Return alteredRecord that contains new deleted_at timestamp and send in response.
+       * Catch case where record doesn't exist.
        */
       const [alteredRecord] = await database('addresses')
         .select('*')
-        .where('id', '=', ADDRESS_ID)
-        .andWhere('person_id', '=', PERSON_ID)
+        .where('id', '=', req.params.addressID)
+        .andWhere('person_id', '=', req.params.personID)
         .update({
           deleted_at: moment().toISOString()
         })
         .returning('*')
-      // Respond with full record info including change made to deleted_at
+      /**
+       * If no address record with the specified IDs exists in database,
+       * respond with error object and 404 status code.
+       * Else respond with found person record as object and 200 status code.
+       */
+      if (!alteredRecord) {
+        // Respond with empty object because no record found
+        res
+          .status(statusCodes.NotFound)
+          .json({
+            error: `No record found for specified personID<${req.params.personID}> addressID<${req.params.addressID}>.`
+          })
+      }
+      // Respond with updated record info including change made to deleted_at
       res
         .status(statusCodes.OK)
         .json(alteredRecord)
@@ -311,32 +271,4 @@ module.exports = (api) => {
         })
     }
   })
-}
-
-/*
-Gets information from HTTP request, saves to local vars, and logs (if necessary)
-*/
-const processNewReqInfo = (protocol, host, originalURL, path, params, pID, aID) => {
-  // Update info
-  FULL_URL = protocol + '://' + host + originalURL
-  REQ_PATH = path
-  REQ_PARAMS = params
-  PERSON_ID = pID
-  ADDRESS_ID = aID
-  // Log info
-  /*
-  console.log(
-    '\n\n',
-    'Full URL:', FULL_URL,
-    '\n',
-    'API Path:', REQ_PATH,
-    '\n',
-    'req.params:', REQ_PARAMS,
-    '\n',
-    'req.params.personID:', PERSON_ID,
-    '\n',
-    'req.params.addressID:', ADDRESS_ID,
-    '\n'
-  )
-  */
 }
