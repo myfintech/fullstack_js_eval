@@ -1,6 +1,7 @@
 const statusCodes = require('../../../lib/httpStatusCodes')
 const httpErrorMessages = require('../../../lib/httpErrorMessages')
-const { database } = require('../../../lib/database')
+const { database } = require('../../../lib/database');
+const moment = require('moment');
 
 module.exports = (api) => {
   /**
@@ -8,9 +9,12 @@ module.exports = (api) => {
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const [person] = await database('people').insert(req.body).returning('*')
+      return res.status(statusCodes.OK).json(person);
+    } catch (e) {
+      return res.sendStatus(statusCodes.InternalServerError);
+    }
   })
 
   /**
@@ -18,9 +22,17 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const [person] = await database('people').where('id', req.params.personID);
+      
+      if (!person){
+        return res.sendStatus(statusCodes.NotFound);
+      }
+      
+      return res.status(statusCodes.OK).json(person);
+    } catch (e) {
+      return res.sendStatus(statusCodes.InternalServerError);
+    }
   })
 
   /**
@@ -28,10 +40,13 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+    try {
+      const people = await database('people');
+      return res.status(statusCodes.OK).json(people);
+    } catch (e) {
+      return res.sendStatus(statusCodes.InternalServerError);
+    }
+  });
 
   /**
    * Do not modify beyond this point until you have reached
@@ -45,9 +60,19 @@ module.exports = (api) => {
    * Create a new address belonging to a person
    **/
   api.post('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const [address] = await database('addresses')
+        .insert({ person_id: req.params.personID, ...req.body })
+        .returning('*');
+
+        if (!address){
+          return res.sendStatus(statusCodes.NotFound);
+        }
+
+      return res.status(statusCodes.OK).json(address);
+    } catch (e) {
+      return res.sendStatus(statusCodes.InternalServerError);
+    }
   })
 
   /**
@@ -55,9 +80,19 @@ module.exports = (api) => {
    * Retrieve an address by it's addressID and personID
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const address = await database('addresses')
+        .where({ id: req.params.addressID, person_id: req.params.personID})
+        .whereNull('deleted_at');
+
+      if (!address.length){
+        return res.sendStatus(statusCodes.NotFound);
+      }
+
+      return res.status(statusCodes.OK).json(address);
+    } catch (e){
+      return res.sendStatus(statusCodes.InternalServerError);
+    }
   })
 
   /**
@@ -65,9 +100,19 @@ module.exports = (api) => {
    * List all addresses belonging to a personID
    **/
   api.get('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const addresses = await database('addresses')
+        .where({ person_id: req.params.personID })
+        .whereNull('deleted_at');
+
+      if (!addresses.length){
+        return res.sendStatus(statusCodes.NotFound);
+      }
+
+      return res.status(statusCodes.OK).json(addresses);
+    } catch (e) {
+      return res.sendStatus(statusCodes.InternalServerError);
+    }
   })
 
   /**
@@ -78,8 +123,19 @@ module.exports = (api) => {
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
   api.delete('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+    try {
+      const [deletedRecord] = await database('addresses')
+        .where({ id: req.params.addressID, person_id: req.params.personID })
+        .update({ deleted_at: moment().toISOString() })
+        .returning(['id', 'deleted_at'])
+        
+        if (!deletedRecord){
+          return res.sendStatus(statusCodes.NotFound);
+        }
+
+      return res.status(statusCodes.OK).json(deletedRecord);
+    } catch (e) {
+      return res.sendStatus(statusCodes.InternalServerError);
+    }
+  });
 }
