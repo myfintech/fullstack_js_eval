@@ -24,9 +24,23 @@ const firstPerson = {
   created_at: moment().toISOString()
 }
 
+const firstAddress = {
+  line1: faker.address.streetAddress(),
+  line2: faker.address.secondaryAddress(),
+  city: faker.address.city(),
+  state: faker.address.state(),
+  zip: faker.address.zipCode(),
+  created_at: moment().toISOString()
+}
+
+// const deletedAddress = Object.assign({}, firstAddress);
+// deletedAddress.deleted_at = moment().toISOString();
+
 module.exports = {
   contentTypes,
   firstPerson,
+  firstAddress,
+  // deletedAddress,
   peopleSchema,
   addressesSchema,
   passingRootServerResponse,
