@@ -15,26 +15,22 @@ module.exports = (api) => {
    */
 
   api.post('/', async (req, res, next) => {
-    try {
-      const person = req.body;
-      if (Object.entries(person).length === 0 && person.constructor === Object) {
-        const err = new Error('Error: empty request body')
-        err.httpStatusCode = 400
-        return next(err)
-      }
-      database.insert(person).returning('id').into('people').then(function(id) {
-        person['id'] = id[0];
-        res
-          .status(200)
-          .json(person)
-      }).catch((err) => {
-        err.httpStatusCode = 404
-        return next(err)
-      })
-    } catch (err) {
-      err.httpStatusCode = 500
+    const person = req.body;
+    if (Object.entries(person).length === 0 && person.constructor === Object) {
+      const err = new Error('empty request body')
+      err.httpStatusCode = 400
       return next(err)
     }
+
+    database.insert(person).returning('id').into('people').then(function(id) {
+      person['id'] = id[0];
+      res
+        .status(200)
+        .json(person)
+    }).catch((err) => {
+      err.httpStatusCode = 404
+      return next(err)
+    })
   })
 
   /**
@@ -44,10 +40,11 @@ module.exports = (api) => {
   api.get('/:personID', async (req, res, next) => {
     const person_id = req.params.personID;
     if (!person_id) {
-      const err = new Error('Error: personID is required')
+      const err = new Error('personID is required')
       err.httpStatusCode = 400
       return next(err)
     }
+
     database('people')
       .select("*")
       .where({
@@ -75,21 +72,16 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res, next) => {
-    try {
-      database('people')
-        .select("*")
-        .then(rows => {
-          res
-            .status(200)
-            .json(rows)
-        }).catch((err) => {
-          err.httpStatusCode = 404
-          return next(err)
-        })
-    } catch (err) {
-      err.httpStatusCode = 500
-      return next(err)
-    }
+    database('people')
+      .select("*")
+      .then(rows => {
+        res
+          .status(200)
+          .json(rows)
+      }).catch((err) => {
+        err.httpStatusCode = 404
+        return next(err)
+      })
   })
 
   function deleteNullRows(person) {
@@ -114,33 +106,28 @@ module.exports = (api) => {
    * Create a new address belonging to a person
    **/
   api.post('/:personID/addresses', async (req, res, next) => {
-    try {
-      const person_id = req.params.personID;
-      const address = req.body;
-      if (Object.entries(address).length === 0 && address.constructor === Object) {
-        return res.status(400).send({
-          message: 'Error: empty request body'
-        });
-      } else if (!person_id) {
-        return res.status(400).send({
-          message: 'Error: personID is required'
-        });
-      }
-
-      address.person_id = person_id;
-      database.insert(address).returning('id').into('addresses').then(function(id) {
-        address['id'] = id[0];
-        res
-          .status(200)
-          .json(address)
-      }).catch((err) => {
-        err.httpStatusCode = 404
-        return next(err)
-      })
-    } catch (err) {
-      err.httpStatusCode = 500
-      return next(err)
+    const person_id = req.params.personID;
+    const address = req.body;
+    if (Object.entries(address).length === 0 && address.constructor === Object) {
+      return res.status(400).send({
+        message: 'empty request body'
+      });
+    } else if (!person_id) {
+      return res.status(400).send({
+        message: 'personID is required'
+      });
     }
+
+    address.person_id = person_id;
+    database.insert(address).returning('id').into('addresses').then(function(id) {
+      address['id'] = id[0];
+      res
+        .status(200)
+        .json(address)
+    }).catch((err) => {
+      err.httpStatusCode = 404
+      return next(err)
+    })
   })
 
   /**
@@ -148,35 +135,35 @@ module.exports = (api) => {
    * Retrieve an address by it's addressID and personID
    **/
   api.get('/:personID/addresses/:addressID', async (req, res, next) => {
-    try {
-      const person_id = req.params.personID;
-      const address_id = req.params.addressID;
-      if (!person_id || !address_id) {
-        const err = new Error('Error: personID and addressID are required')
-        err.httpStatusCode = 400
-        return next(err)
-      }
-
-      database('addresses')
-        .select("*")
-        .whereNull('deleted_at')
-        .where({
-          id: address_id,
-          person_id: person_id
-        })
-        .then(rows => {
-          deleteNullRows(rows[0]);
-          res
-            .status(200)
-            .json(rows[0])
-        }).catch((err) => {
-          err.httpStatusCode = 404
-          return next(err)
-        })
-    } catch (err) {
-      err.httpStatusCode = 500
+    const person_id = req.params.personID;
+    const address_id = req.params.addressID;
+    if (!person_id || !address_id) {
+      const err = new Error('personID and addressID are required')
+      err.httpStatusCode = 400
       return next(err)
     }
+
+    database('addresses')
+      .select("*")
+      .whereNull('deleted_at')
+      .where({
+        id: address_id,
+        person_id: person_id
+      })
+      .then(rows => {
+        if (rows.length === 0) {
+          const err = new Error('personID and addressID not found')
+          err.httpStatusCode = 404
+          return next(err)
+        }
+        deleteNullRows(rows[0]);
+        res
+          .status(200)
+          .json(rows[0])
+      }).catch((err) => {
+        err.httpStatusCode = 404
+        return next(err)
+      })
   })
 
   /**
@@ -184,31 +171,32 @@ module.exports = (api) => {
    * List all addresses belonging to a personID
    **/
   api.get('/:personID/addresses', async (req, res, next) => {
-    try {
-      const person_id = req.params.personID;
-      if (!person_id) {
-        const err = new Error('Error: personID is required')
-        err.httpStatusCode = 400
-        return next(err)
-      }
-      database('addresses')
-        .select("*")
-        .whereNull('deleted_at')
-        .where({
-          person_id: person_id
-        })
-        .then(rows => {
-          res
-            .status(200)
-            .json(rows)
-        }).catch((err) => {
-          err.httpStatusCode = 404
-          return next(err)
-        })
-    } catch (err) {
-      err.httpStatusCode = 500
+    const person_id = req.params.personID;
+    if (!person_id) {
+      const err = new Error('personID is required')
+      err.httpStatusCode = 400
       return next(err)
     }
+
+    database('addresses')
+      .select("*")
+      .whereNull('deleted_at')
+      .where({
+        person_id: person_id
+      })
+      .then(rows => {
+        if (rows.length === 0) {
+          const err = new Error('personID not found')
+          err.httpStatusCode = 404
+          return next(err)
+        }
+        res
+          .status(200)
+          .json(rows)
+      }).catch((err) => {
+        err.httpStatusCode = 404
+        return next(err)
+      })
   })
 
   /**
@@ -219,36 +207,37 @@ module.exports = (api) => {
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
   api.delete('/:personID/addresses/:addressID', async (req, res, next) => {
-    try {
-      const person_id = req.params.personID;
-      const address_id = req.params.addressID;
-      if (!person_id || !address_id) {
-        const err = new Error('personID and addressID are required')
-        err.httpStatusCode = 400
-        return next(err)
-      }
-      database('addresses')
-        .select("*")
-        .whereNull('deleted_at')
-        .where({
-          id: address_id,
-          person_id: person_id
-        }).update({
-          deleted_at: moment().toISOString()
-        })
-        .returning('*')
-        .then(updatedRows => {
-          res
-            .status(200)
-            .json(updatedRows[0])
-        }).catch((err) => {
-          err.httpStatusCode = 404
-          return next(err)
-        })
-    } catch (err) {
-      err.httpStatusCode = 500
+    const person_id = req.params.personID;
+    const address_id = req.params.addressID;
+    if (!person_id || !address_id) {
+      const err = new Error('personID and addressID are required')
+      err.httpStatusCode = 400
       return next(err)
     }
+
+    database('addresses')
+      .select("*")
+      .whereNull('deleted_at')
+      .where({
+        id: address_id,
+        person_id: person_id
+      }).update({
+        deleted_at: moment().toISOString()
+      })
+      .returning('*')
+      .then(updatedRows => {
+        if (updatedRows.length === 0) {
+          const err = new Error('personID and addressID not found')
+          err.httpStatusCode = 404
+          return next(err)
+        }
+        res
+          .status(200)
+          .json(updatedRows[0])
+      }).catch((err) => {
+        err.httpStatusCode = 404
+        return next(err)
+      })
   })
 
 }
