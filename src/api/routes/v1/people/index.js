@@ -1,19 +1,14 @@
 const statusCodes = require('../../../lib/httpStatusCodes')
 const httpErrorMessages = require('../../../lib/httpErrorMessages')
-const {
-  database
-} = require('../../../lib/database')
+const { database } = require('../../../lib/database')
 const moment = require('moment')
 
 
 module.exports = (api) => {
-
-
   /**
    * POST /v1/people
    * Create a new person
    */
-
   api.post('/', async (req, res, next) => {
     const person = req.body;
     if (Object.entries(person).length === 0 && person.constructor === Object) {

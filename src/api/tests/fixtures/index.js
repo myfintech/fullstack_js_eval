@@ -33,14 +33,11 @@ const firstAddress = {
   created_at: moment().toISOString()
 }
 
-// const deletedAddress = Object.assign({}, firstAddress);
-// deletedAddress.deleted_at = moment().toISOString();
 
 module.exports = {
   contentTypes,
   firstPerson,
   firstAddress,
-  // deletedAddress,
   peopleSchema,
   addressesSchema,
   passingRootServerResponse,

@@ -2,8 +2,6 @@ const fixtures = require('./fixtures')
 const httpStatusCodes = require('../lib/httpStatusCodes')
 const { client } = require('./setup/supertestServer')
 const { expect } = require('chai')
-// chai.should();
-// chai.use(require('chai-things'));
 
 describe('People API', () => {
   it('POST /v1/people should create a new person', async () => {
