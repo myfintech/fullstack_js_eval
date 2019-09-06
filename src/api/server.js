@@ -60,10 +60,16 @@ function createServer ({ requestLogging } = {}) {
   })
 
   api.use((error, req, res, next) => {
-    res.status(500).json({
+    if(!error.httpStatusCode){
+      res.status(500).json({
+        error
+      })
+    }
+    res.status(error.httpStatusCode).json({
       error
     })
   })
+
 
   return api
 }

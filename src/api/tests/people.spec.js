@@ -2,6 +2,8 @@ const fixtures = require('./fixtures')
 const httpStatusCodes = require('../lib/httpStatusCodes')
 const { client } = require('./setup/supertestServer')
 const { expect } = require('chai')
+// chai.should();
+// chai.use(require('chai-things'));
 
 describe('People API', () => {
   it('POST /v1/people should create a new person', async () => {
@@ -50,7 +52,8 @@ describe('People API', () => {
       .send(fixtures.firstAddress)
       .expect(httpStatusCodes.OK)
       .then(resp => {
-        fixtures.firstAddress = resp.body
+        fixtures.firstAddress = resp.body;
+        expect(resp.body).to.have.property('id');
       })
   })
 
@@ -66,7 +69,7 @@ describe('People API', () => {
       .expect('Content-Type', fixtures.contentTypes.json)
       .expect(httpStatusCodes.OK)
       .then(resp => {
-        expect(resp.body).to.have.lengthOf.above(0)
+        expect(resp.body).to.have.lengthOf.above(0);
       })
   })
 
