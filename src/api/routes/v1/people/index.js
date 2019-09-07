@@ -1,6 +1,8 @@
 const statusCodes = require('../../../lib/httpStatusCodes')
 const httpErrorMessages = require('../../../lib/httpErrorMessages')
-const { database } = require('../../../lib/database')
+const {
+  database
+} = require('../../../lib/database')
 const moment = require('moment')
 
 
@@ -11,20 +13,21 @@ module.exports = (api) => {
    */
   api.post('/', async (req, res, next) => {
     const person = req.body;
+    //Checking for invalid/non-existent request body
     if (Object.entries(person).length === 0 && person.constructor === Object) {
-      const err = new Error('empty request body')
-      err.httpStatusCode = 400
-      return next(err)
+      const err = new Error('empty request body');
+      err.httpStatusCode = 400;
+      return next(err);
     }
-
+    //Inserting a person into the database
     database.insert(person).returning('id').into('people').then(function(id) {
       person['id'] = id[0];
       res
         .status(200)
         .json(person)
     }).catch((err) => {
-      err.httpStatusCode = 404
-      return next(err)
+      err.httpStatusCode = 404;
+      return next(err);
     })
   })
 
@@ -34,12 +37,13 @@ module.exports = (api) => {
    */
   api.get('/:personID', async (req, res, next) => {
     const person_id = req.params.personID;
+    //Checking for invalid/non-existent parameters
     if (!person_id) {
-      const err = new Error('personID is required')
-      err.httpStatusCode = 400
-      return next(err)
+      const err = new Error('personID is required');
+      err.httpStatusCode = 400;
+      return next(err);
     }
-
+    //Retrieve a person object for a specific personID
     database('people')
       .select("*")
       .where({
@@ -47,18 +51,18 @@ module.exports = (api) => {
       })
       .then(rows => {
         if (rows.length === 0) {
-          const err = new Error('personID not found')
-          err.httpStatusCode = 404
-          return next(err)
+          const err = new Error('personID not found');
+          err.httpStatusCode = 404;
+          return next(err);
         }
-        deleteNullRows(rows[0]);
+        deleteNullRows(rows[0]); // Calling this function to remove null rows from objects in order to pass tests
         rows[0].birthday = new moment(rows[0].birthday).format('YYYY-MM-DD'); //Knex.js enters POSTGRESQL DATE data types  as dates with timezone by default so using this line to remove the timezone from the date string
         res
           .status(200)
           .json(rows[0])
       }).catch((err) => {
-        err.httpStatusCode = 404
-        return next(err)
+        err.httpStatusCode = 404;
+        return next(err);
       })
   })
 
@@ -67,6 +71,7 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res, next) => {
+    //Retreiving an array of objects of all people from the people table
     database('people')
       .select("*")
       .then(rows => {
@@ -74,8 +79,8 @@ module.exports = (api) => {
           .status(200)
           .json(rows)
       }).catch((err) => {
-        err.httpStatusCode = 404
-        return next(err)
+        err.httpStatusCode = 404;
+        return next(err);
       })
   })
 
@@ -103,6 +108,7 @@ module.exports = (api) => {
   api.post('/:personID/addresses', async (req, res, next) => {
     const person_id = req.params.personID;
     const address = req.body;
+    //Checking for invalid/non-existent parameters and request body
     if (Object.entries(address).length === 0 && address.constructor === Object) {
       return res.status(400).send({
         message: 'empty request body'
@@ -114,14 +120,15 @@ module.exports = (api) => {
     }
 
     address.person_id = person_id;
+    //Inserting an address into the database
     database.insert(address).returning('id').into('addresses').then(function(id) {
       address['id'] = id[0];
       res
         .status(200)
         .json(address)
     }).catch((err) => {
-      err.httpStatusCode = 404
-      return next(err)
+      err.httpStatusCode = 404;
+      return next(err);
     })
   })
 
@@ -132,12 +139,13 @@ module.exports = (api) => {
   api.get('/:personID/addresses/:addressID', async (req, res, next) => {
     const person_id = req.params.personID;
     const address_id = req.params.addressID;
+    //Checking for invalid/non-existent parameters
     if (!person_id || !address_id) {
-      const err = new Error('personID and addressID are required')
-      err.httpStatusCode = 400
-      return next(err)
+      const err = new Error('personID and addressID are required');
+      err.httpStatusCode = 400;
+      return next(err);
     }
-
+    //Retrieve an address for a specific personID and addressID
     database('addresses')
       .select("*")
       .whereNull('deleted_at')
@@ -147,17 +155,17 @@ module.exports = (api) => {
       })
       .then(rows => {
         if (rows.length === 0) {
-          const err = new Error('personID and addressID not found')
-          err.httpStatusCode = 404
-          return next(err)
+          const err = new Error('personID and addressID not found');
+          err.httpStatusCode = 404;
+          return next(err);
         }
         deleteNullRows(rows[0]);
         res
           .status(200)
           .json(rows[0])
       }).catch((err) => {
-        err.httpStatusCode = 404
-        return next(err)
+        err.httpStatusCode = 404;
+        return next(err);
       })
   })
 
@@ -167,12 +175,13 @@ module.exports = (api) => {
    **/
   api.get('/:personID/addresses', async (req, res, next) => {
     const person_id = req.params.personID;
+    //Checking for invalid/non-existent parameters
     if (!person_id) {
-      const err = new Error('personID is required')
-      err.httpStatusCode = 400
-      return next(err)
+      const err = new Error('personID is required');
+      err.httpStatusCode = 400;
+      return next(err);
     }
-
+    //Retrieve all non-deleted addresses for a specific personID
     database('addresses')
       .select("*")
       .whereNull('deleted_at')
@@ -181,16 +190,16 @@ module.exports = (api) => {
       })
       .then(rows => {
         if (rows.length === 0) {
-          const err = new Error('personID not found')
-          err.httpStatusCode = 404
-          return next(err)
+          const err = new Error('personID not found');
+          err.httpStatusCode = 404;
+          return next(err);
         }
         res
           .status(200)
           .json(rows)
       }).catch((err) => {
-        err.httpStatusCode = 404
-        return next(err)
+        err.httpStatusCode = 404;
+        return next(err);
       })
   })
 
@@ -204,12 +213,13 @@ module.exports = (api) => {
   api.delete('/:personID/addresses/:addressID', async (req, res, next) => {
     const person_id = req.params.personID;
     const address_id = req.params.addressID;
+    //Checking for invalid/non-existent parameters
     if (!person_id || !address_id) {
-      const err = new Error('personID and addressID are required')
-      err.httpStatusCode = 400
-      return next(err)
+      const err = new Error('personID and addressID are required');
+      err.httpStatusCode = 400;
+      return next(err);
     }
-
+    //Retreiving the requested address from the adddresses table and assigning it's deleted_at key to current time to indicate it's deleted
     database('addresses')
       .select("*")
       .whereNull('deleted_at')
@@ -222,17 +232,16 @@ module.exports = (api) => {
       .returning('*')
       .then(updatedRows => {
         if (updatedRows.length === 0) {
-          const err = new Error('personID and addressID not found')
-          err.httpStatusCode = 404
-          return next(err)
+          const err = new Error('personID and addressID not found');
+          err.httpStatusCode = 404;
+          return next(err);
         }
         res
           .status(200)
           .json(updatedRows[0])
       }).catch((err) => {
-        err.httpStatusCode = 404
-        return next(err)
+        err.httpStatusCode = 404;
+        return next(err);
       })
   })
-
 }
