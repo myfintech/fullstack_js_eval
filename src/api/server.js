@@ -65,6 +65,11 @@ function createServer ({ requestLogging } = {}) {
     })
   })
 
+  api.use((req, res, next) => {
+    res.header("Content-Type",'application/json');
+    next();
+  });
+
   return api
 }
 

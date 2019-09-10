@@ -9,7 +9,7 @@ postgres.migrate:
 # delete it's data volume
 # start again (this action is destructive)
 postgres.reset:
-	dropdb mantl
+	dropdb --if-exists mantl
 	createdb -O mantl mantl
 	$(MAKE) postgres.migrate
 .PHONY: postgres.reset
