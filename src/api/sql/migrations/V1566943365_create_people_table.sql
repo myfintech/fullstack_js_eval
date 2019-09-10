@@ -19,7 +19,7 @@ CREATE TABLE people (
     birthday DATE NOT NULL,
     company VARCHAR(256),
     title VARCHAR(256),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     updated_at TIMESTAMP WITH TIME ZONE,
     deleted_at TIMESTAMP WITH TIME ZONE
 );

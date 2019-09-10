@@ -21,7 +21,7 @@ CREATE TABLE addresses (
     city VARCHAR(256) NOT NULL,
     state VARCHAR(256) NOT NULL,
     zip VARCHAR(256) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     updated_at TIMESTAMP WITH TIME ZONE,
     deleted_at TIMESTAMP WITH TIME ZONE
 );
