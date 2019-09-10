@@ -40,7 +40,7 @@ module.exports = (api) => {
   api.get('/:personID', async (req, res) => {
     const personID = req.params.personID;
     try {
-      const response = await database.select().from('people').where({'id': personID});
+      const response = await database.select().from('people').where({'id': personID}).whereNull('deleted_at');
       if (response.length > 0) {
         return res
           .status(statusCodes.OK)
@@ -65,7 +65,7 @@ module.exports = (api) => {
    */
   api.get('/', async (req, res) => {
     try {
-      const response = await database.select().from('people');
+      const response = await database.select().from('people').whereNull('deleted_at');
       res
         .status(statusCodes.OK)
         .json(response)
@@ -122,7 +122,7 @@ module.exports = (api) => {
     const personID = req.params.personID;
     const addressID = req.params.addressID;
     try {
-      const response = await database.select().from('addresses').where({'person_id': personID, 'id': addressID});
+      const response = await database.select().from('addresses').where({'person_id': personID, 'id': addressID}).whereNull('deleted_at');
       if (response.length > 0) {
         return res
           .status(statusCodes.OK)
@@ -147,7 +147,7 @@ module.exports = (api) => {
   api.get('/:personID/addresses', async (req, res) => {
     const personID = req.params.personID;
     try {
-      const response = await database.select().from('addresses').where({'person_id': personID});
+      const response = await database.select().from('addresses').where({'person_id': personID}).whereNull('deleted_at');
       return res
         .status(statusCodes.OK)
         .json(response)
