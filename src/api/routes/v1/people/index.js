@@ -1,16 +1,23 @@
 const statusCodes = require('../../../lib/httpStatusCodes')
 const httpErrorMessages = require('../../../lib/httpErrorMessages')
-const { database } = require('../../../lib/database')
+const dbDelegate = require('./db-delegate');
 
 module.exports = (api) => {
   /**
    * POST /v1/people
    * Create a new person
    */
-  api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+  api.post('/', async (req, res) => {
+    const response = await dbDelegate.addPerson(req)
+      .catch(() => {
+        return res
+          .status(statusCodes.InternalServerError)
+          .json(httpErrorMessages.InternalServerError)
+      })
+
+    return res
+      .status(statusCodes.OK)
+      .json(response[0])
   })
 
   /**
@@ -18,9 +25,23 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const { personID } = req.params;
+    const response = await dbDelegate.getPerson(personID)
+      .catch(() => {
+        return res
+          .status(statusCodes.InternalServerError)
+          .json(httpErrorMessages.InternalServerError)
+      })
+
+    if (response.length > 0) {
+      return res
+        .status(statusCodes.OK)
+        .json(response[0])
+    }
+
+    return res
+      .status(statusCodes.NotFound)
+      .json()
   })
 
   /**
@@ -28,9 +49,16 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const response = await dbDelegate.getPeople()
+      .catch(() => {
+        return res
+          .status(statusCodes.InternalServerError)
+          .json(httpErrorMessages.InternalServerError)
+      })
+
+    return res
+      .status(statusCodes.OK)
+      .json(response)
   })
 
   /**
@@ -45,9 +73,17 @@ module.exports = (api) => {
    * Create a new address belonging to a person
    **/
   api.post('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const { personID } = req.params;
+    const response = await dbDelegate.addAddress(personID, req)
+      .catch(() => {
+        return res
+          .status(statusCodes.InternalServerError)
+          .json(httpErrorMessages.InternalServerError)
+      })
+
+    return res
+      .status(statusCodes.OK)
+      .json(response[0])
   })
 
   /**
@@ -55,9 +91,23 @@ module.exports = (api) => {
    * Retrieve an address by it's addressID and personID
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const { personID, addressID } = req.params;
+    const response = await dbDelegate.getAddress(personID, addressID)
+      .catch(() => {
+        return res
+          .status(statusCodes.InternalServerError)
+          .json(httpErrorMessages.InternalServerError)
+      })
+
+    if (response.length > 0) {
+      return res
+        .status(statusCodes.OK)
+        .json(response[0])
+    }
+
+    return res
+      .status(statusCodes.NotFound)
+      .json()
   })
 
   /**
@@ -65,9 +115,17 @@ module.exports = (api) => {
    * List all addresses belonging to a personID
    **/
   api.get('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const { personID } = req.params
+    const response = await dbDelegate.getAddresses(personID)
+      .catch(() => {
+        return res
+          .status(statusCodes.InternalServerError)
+          .json(httpErrorMessages.InternalServerError)
+      })
+
+    return res
+      .status(statusCodes.OK)
+      .json(response)
   })
 
   /**
@@ -78,8 +136,22 @@ module.exports = (api) => {
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
   api.delete('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const { personID, addressID } = req.params
+    const response = await dbDelegate.deleteAddress(personID, addressID)
+      .catch(() => {
+        return res
+          .status(statusCodes.InternalServerError)
+          .json(httpErrorMessages.InternalServerError)
+      })
+
+    if (response.length > 0) {
+      return res
+        .status(statusCodes.OK)
+        .json(response[0])
+    }
+
+    return res
+      .status(statusCodes.NotFound)
+      .json()
   })
 }

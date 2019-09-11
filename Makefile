@@ -9,7 +9,8 @@ postgres.migrate:
 # delete it's data volume
 # start again (this action is destructive)
 postgres.reset:
-	dropdb mantl
+    # Ran into an issue setting up workspace again. Updated the command to check if the database exists
+	dropdb --if-exists mantl
 	createdb -O mantl mantl
 	$(MAKE) postgres.migrate
 .PHONY: postgres.reset
