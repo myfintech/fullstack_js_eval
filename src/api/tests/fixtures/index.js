@@ -24,6 +24,15 @@ const firstPerson = {
   created_at: moment().toISOString()
 }
 
+//added an entry for address
+const newAddress = {
+  line1: faker.address.streetAddress(),
+  line2: faker.address.secondaryAddress(),
+  city: faker.address.city(),
+  state: faker.address.state(),
+  zip: faker.address.zipCode()
+};
+
 module.exports = {
   contentTypes,
   firstPerson,
@@ -31,5 +40,6 @@ module.exports = {
   addressesSchema,
   passingRootServerResponse,
   passingHealthCheckResponse,
-  dataContainer: {}
+  dataContainer: {},
+  newAddress
 }
