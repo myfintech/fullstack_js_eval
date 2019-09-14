@@ -8,9 +8,18 @@ module.exports = (api) => {
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
+    const person = {
+      first_name: req.body.first_name,
+      last_name: req.body.last_name,
+      birthday: req.body.birthday,
+      company: req.body.company,
+      title: req.body.title
+    }
+    const newPerson  = await database('people').insert(person, ['id'])
+    console.log(newPerson)
     res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+      .status(statusCodes.OK)
+      .json({person: person})
   })
 
   /**
@@ -18,9 +27,11 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
+    const person = await 
     res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+      .status(statusCodes.OK)
+      .json({person: person})
+      .catch()
   })
 
   /**
