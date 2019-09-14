@@ -1,3 +1,16 @@
+CREATE TABLE addresses (
+	id BIGSERIAL PRIMARY KEY,
+	person_id BIGINT REFERENCES people(id) NOT NULL,
+	line1 varchar(256) NOT NULL,
+	line2 varchar(256),
+	city varchar(256) NOT NULL,
+	state varchar(256) NOT NULL,
+	zip varchar(256) NOT NULL,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	updated_at TIMESTAMP WITH TIME ZONE,
+	deleted_at TIMESTAMP WITH TIME ZONE
+)
+
 /**
  * Write SQL that creates a table named 'addresses'
  * it should match this schema
