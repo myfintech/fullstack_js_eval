@@ -1,6 +1,7 @@
 const statusCodes = require('../../../lib/httpStatusCodes')
 const httpErrorMessages = require('../../../lib/httpErrorMessages')
 const { database } = require('../../../lib/database')
+const moment = require('moment')
 
 module.exports = (api) => {
   /**
@@ -15,11 +16,13 @@ module.exports = (api) => {
       company: req.body.company,
       title: req.body.title
     }
-    const newPerson  = await database('people').insert(person, ['id'])
-    console.log(newPerson)
+    const personID  = await database('people').insert(person, ['id'])
+    // console.log(personID[0])
+    person.id = personID[0].id
+    // console.log(person)
     res
       .status(statusCodes.OK)
-      .json({person: person})
+      .json(person)
   })
 
   /**
@@ -27,11 +30,20 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
-    const person = await 
-    res
-      .status(statusCodes.OK)
-      .json({person: person})
-      .catch()
+    // console.log(req)
+    const result = await database('people').select('id', 'first_name', 'last_name', 'company', 'title', 'birthday').where({id: req.params.personID})
+    // console.log(result)
+    if (result.length > 0){
+      const person = result[0]
+      person.birthday = moment(person.birthday).format('YYYY-MM-DD')
+      res
+        .status(statusCodes.OK)
+        .json(person)
+    } else {
+      res
+        .status(statusCodes.NotFound)
+        .end()
+    }
   })
 
   /**
@@ -39,9 +51,11 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res) => {
+     const result = await database('people').select('id', 'first_name', 'last_name', 'company', 'title', 'birthday')
+     console.log(result)
     res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+      .status(statusCodes.OK)
+      .json(result)
   })
 
   /**
