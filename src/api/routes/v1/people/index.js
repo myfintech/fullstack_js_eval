@@ -9,6 +9,7 @@ module.exports = (api) => {
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
+    // console.log(req)
     const person = {
       first_name: req.body.first_name,
       last_name: req.body.last_name,
@@ -52,7 +53,7 @@ module.exports = (api) => {
    */
   api.get('/', async (req, res) => {
      const result = await database('people').select('id', 'first_name', 'last_name', 'company', 'title', 'birthday')
-     console.log(result)
+     // console.log(result)
     res
       .status(statusCodes.OK)
       .json(result)
@@ -70,9 +71,28 @@ module.exports = (api) => {
    * Create a new address belonging to a person
    **/
   api.post('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    // console.log(req)
+    const address = {
+      line1: req.body.line1,
+      line2: req.body.line2,
+      city: req.body.city,
+      state: req.body.state,
+      zip: req.body.zip,
+      person_id: req.params.personID
+    }
+
+    try {
+      const addressID  = await database('addresses').insert(address, ['id'])
+      address.id = addressID[0].id
+      res
+        .status(statusCodes.OK)
+        .json(address)
+    }
+    catch(err){
+      res 
+        .status(statusCodes.BadRequest)
+        .json(err)
+    }
   })
 
   /**
