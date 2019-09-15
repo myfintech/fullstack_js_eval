@@ -101,9 +101,17 @@ module.exports = (api) => {
    * Retrieve an address by it's addressID and personID
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const results = await database('addresses')
+      .select(['id', 'person_id', 'line1', 'city',
+              'state', 'zip', 'created_at'])
+    if (results.length > 0) {
+      res.status(200).send(results[0])
+    } else {
+      const err = new Error('Address not found');
+      err.statusCode = 404;
+      next(err);
+    }
+
   })
 
   /**
