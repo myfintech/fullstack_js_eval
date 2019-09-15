@@ -117,9 +117,11 @@ module.exports = (api) => {
    * List all addresses belonging to a personID
    **/
   api.get('/:personID/addresses', async (req, res) => {
+    const address = await database('addresses').select().where({person_id: req.params.personID})
+    console.log(address)
     res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+      .status(statusCodes.OK)
+      .json(address)
   })
 
   /**
