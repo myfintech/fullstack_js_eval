@@ -1,5 +1,6 @@
 const statusCodes = require('../../../lib/httpStatusCodes')
 const httpErrorMessages = require('../../../lib/httpErrorMessages')
+const moment = require('moment')
 const { database } = require('../../../lib/database')
 
 module.exports = (api) => {
@@ -138,9 +139,21 @@ module.exports = (api) => {
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
   api.delete('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const results = await database('addresses')
+      .where({
+        id: req.params.addressID,
+        person_id: req.params.personID
+      })
+      .update({
+        deleted_at: moment().toISOString()
+      }, ['id', 'deleted_at'])
+    if (results.length > 0) {
+      res.status(200).send(results[0])
+    } else {
+      const err = new Error('Unable to delete address');
+      err.statusCode = 404;
+      next(err);
+    }
   })
 
   api.use((err, req, res, next) => {
