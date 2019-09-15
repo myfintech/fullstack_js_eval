@@ -75,9 +75,25 @@ module.exports = (api) => {
    * Create a new address belonging to a person
    **/
   api.post('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const results = await database('addresses')
+      .returning(['id', 'person_id', 'line1', 'city',
+                  'state', 'zip', 'created_at'])
+      .insert({
+        person_id: req.params.personID,
+        line1: req.body.line1,
+        city: req.body.city,
+        state: req.body.state,
+        zip: req.body.zip,
+        created_at: req.body.created_at
+      })
+    if (results.length > 0) {
+      res.status(200).send(results[0])
+    } else {
+      const err = new Error('Unable to create address');
+      err.statusCode = 500;
+      next(err);
+    }
+
   })
 
   /**
