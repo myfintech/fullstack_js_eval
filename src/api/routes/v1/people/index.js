@@ -9,7 +9,6 @@ module.exports = (api) => {
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
-    // console.log(req)
     const person = {
       first_name: req.body.first_name,
       last_name: req.body.last_name,
@@ -18,9 +17,7 @@ module.exports = (api) => {
       title: req.body.title
     }
     const personID  = await database('people').insert(person, ['id'])
-    // console.log(personID[0])
     person.id = personID[0].id
-    // console.log(person)
     res
       .status(statusCodes.OK)
       .json(person)
@@ -31,9 +28,7 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
-    // console.log(req)
     const result = await database('people').select('id', 'first_name', 'last_name', 'company', 'title', 'birthday').where({id: req.params.personID})
-    // console.log(result)
     if (result.length > 0) {
       const person = result[0]
       person.birthday = moment(person.birthday).format('YYYY-MM-DD')
@@ -52,8 +47,7 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res) => {
-     const result = await database('people').select('id', 'first_name', 'last_name', 'company', 'title', 'birthday')
-     // console.log(result)
+    const result = await database('people').select()
     res
       .status(statusCodes.OK)
       .json(result)
@@ -71,7 +65,6 @@ module.exports = (api) => {
    * Create a new address belonging to a person
    **/
   api.post('/:personID/addresses', async (req, res) => {
-    // console.log(req)
     const address = {
       line1: req.body.line1,
       line2: req.body.line2,
@@ -98,13 +91,12 @@ module.exports = (api) => {
    * Retrieve an address by it's addressID and personID
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
-    // console.log(req.params)
-      const address = await database('addresses').select('id', 'person_id', 'line1', 'line2', 'city', 'state', 'zip').where({id: req.params.addressID, person_id: req.params.personID})
-      // console.log(address)
-      if (address.length > 0) {
+      const result = await database('addresses').select().where({id: req.params.addressID, person_id: req.params.personID})
+      if (result.length > 0) {
+      address = result[0]
       res
         .status(statusCodes.OK)
-        .json(address[0])
+        .json(address)
       } else {
       res 
         .status(statusCodes.NotFound)
@@ -117,11 +109,10 @@ module.exports = (api) => {
    * List all addresses belonging to a personID
    **/
   api.get('/:personID/addresses', async (req, res) => {
-    const address = await database('addresses').select().where({person_id: req.params.personID})
-    console.log(address)
+    const result = await database('addresses').select().where({person_id: req.params.personID})
     res
       .status(statusCodes.OK)
-      .json(address)
+      .json(result)
   })
 
   /**

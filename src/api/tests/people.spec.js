@@ -51,6 +51,9 @@ describe('People API', () => {
     .send(fixtures.firstAddress)
     .expect('Content-Type', fixtures.contentTypes.json)
     .expect(httpStatusCodes.OK)
+    .then(resp => {
+      fixtures.firstAddress = resp.body
+    })
   }) 
 
   it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id', async () => {
@@ -60,9 +63,6 @@ describe('People API', () => {
       .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${addrID}`)
       .expect('Content-Type', fixtures.contentTypes.json)
       .expect(httpStatusCodes.OK)
-      .then(resp => {
-        // console.log(resp)
-      })
   })
 
   it('GET /v1/people/:personID/addresses/:addressID should return a 404 when an incorrect id is used', async () => {
