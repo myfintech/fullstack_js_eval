@@ -37,7 +37,7 @@ module.exports = (api) => {
     const results = await database('people')
       .select(['id', 'first_name', 'last_name',
               'title', 'company', 'birthday', 'created_at'])
-      .where({ id: req.params.personID })
+      .where({ id: req.params.personID, deleted_at: null })
     if (results.length > 0) {
       res.status(200).send(results[0])
     } else {
@@ -55,6 +55,7 @@ module.exports = (api) => {
     const results = await database('people')
       .select(['id', 'first_name', 'last_name',
               'title', 'company', 'birthday', 'created_at'])
+      .where({ deleted_at: null })
     if (results.length > 0) {
       res.status(200).send(results)
     } else {
@@ -104,6 +105,7 @@ module.exports = (api) => {
     const results = await database('addresses')
       .select(['id', 'person_id', 'line1', 'city',
               'state', 'zip', 'created_at'])
+      .where({ deleted_at: null })
     if (results.length > 0) {
       res.status(200).send(results[0])
     } else {
@@ -121,7 +123,7 @@ module.exports = (api) => {
     const results = await database('addresses')
       .select(['id', 'person_id', 'line1', 'city',
               'state', 'zip', 'created_at'])
-      .where({ person_id: req.params.personID })
+      .where({ person_id: req.params.personID, deleted_at: null })
     if (results.length > 0) {
       res.status(200).send(results)
     } else {
