@@ -34,7 +34,7 @@ module.exports = (api) => {
     // console.log(req)
     const result = await database('people').select('id', 'first_name', 'last_name', 'company', 'title', 'birthday').where({id: req.params.personID})
     // console.log(result)
-    if (result.length > 0){
+    if (result.length > 0) {
       const person = result[0]
       person.birthday = moment(person.birthday).format('YYYY-MM-DD')
       res
@@ -80,15 +80,13 @@ module.exports = (api) => {
       zip: req.body.zip,
       person_id: req.params.personID
     }
-
     try {
       const addressID  = await database('addresses').insert(address, ['id'])
       address.id = addressID[0].id
       res
         .status(statusCodes.OK)
         .json(address)
-    }
-    catch(err){
+    } catch(err) {
       res 
         .status(statusCodes.BadRequest)
         .json(err)
@@ -100,9 +98,18 @@ module.exports = (api) => {
    * Retrieve an address by it's addressID and personID
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    // console.log(req.params)
+      const address = await database('addresses').select('id', 'person_id', 'line1', 'line2', 'city', 'state', 'zip').where({id: req.params.addressID, person_id: req.params.personID})
+      // console.log(address)
+      if (address.length > 0) {
+      res
+        .status(statusCodes.OK)
+        .json(address[0])
+      } else {
+      res 
+        .status(statusCodes.NotFound)
+        .end()
+      }
   })
 
   /**
