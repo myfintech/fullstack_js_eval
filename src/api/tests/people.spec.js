@@ -65,7 +65,16 @@ describe('People API', () => {
         expect(resp.body).to.have.property('person_id');
       })
   })
-  it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id')
+  
+  it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id', async () => {
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        expect(resp.body).to.have.lengthOf.above(0)
+      })
+  })
 
   // BONUS!!!
   it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)')

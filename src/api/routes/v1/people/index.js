@@ -93,7 +93,6 @@ module.exports = (api) => {
       err.statusCode = 500;
       next(err);
     }
-
   })
 
   /**
@@ -111,7 +110,6 @@ module.exports = (api) => {
       err.statusCode = 404;
       next(err);
     }
-
   })
 
   /**
@@ -119,9 +117,17 @@ module.exports = (api) => {
    * List all addresses belonging to a personID
    **/
   api.get('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const results = await database('addresses')
+      .select(['id', 'person_id', 'line1', 'city',
+              'state', 'zip', 'created_at'])
+      .where({ person_id: req.params.personID })
+    if (results.length > 0) {
+      res.status(200).send(results)
+    } else {
+      const err = new Error('Addresses not found');
+      err.statusCode = 404;
+      next(err);
+    }
   })
 
   /**
