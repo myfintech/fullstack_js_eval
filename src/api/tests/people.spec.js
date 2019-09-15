@@ -91,7 +91,9 @@ describe('People API', () => {
         .expect(httpStatusCodes.OK)
         .expect('Content-Type', fixtures.contentTypes.json)
         .then(resp => {
-          expect(resp.body.deleted_at !== null)
+          expect(!!resp.body.deleted_at)
         })
-  })
+    })
 })
+
+

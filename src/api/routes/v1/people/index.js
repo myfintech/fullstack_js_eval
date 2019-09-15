@@ -29,16 +29,16 @@ module.exports = (api) => {
    */
   api.get('/:personID', async (req, res) => {
     const result = await database('people').select('id', 'first_name', 'last_name', 'company', 'title', 'birthday').where({id: req.params.personID})
-    if (result.length > 0) {
-      const person = result[0]
+    const person = result[0]
+    try {
       person.birthday = moment(person.birthday).format('YYYY-MM-DD')
       res
         .status(statusCodes.OK)
         .json(person)
-    } else {
+    } catch(err) {
       res
         .status(statusCodes.NotFound)
-        .end()
+        .json(err)
     }
   })
 
@@ -93,8 +93,7 @@ module.exports = (api) => {
   api.get('/:personID/addresses/:addressID', async (req, res) => {
       const result = await database('addresses').select().where({id: req.params.addressID, person_id: req.params.personID})
       const address = result[0]
-      console.log("--------", address)
-      if (address && !address.deleted_at) {
+      if (!!address && !address.deleted_at) {
       res
         .status(statusCodes.OK)
         .json(address)
@@ -110,10 +109,11 @@ module.exports = (api) => {
    * List all addresses belonging to a personID
    **/
   api.get('/:personID/addresses', async (req, res) => {
-    const result = await database('addresses').select().where({person_id: req.params.personID})
+    const results = await database('addresses').select().where({person_id: req.params.personID})
+    const validAddresses = results.filter(result => !result.deleted_at)
     res
       .status(statusCodes.OK)
-      .json(result)
+      .json(validAddresses)
   })
 
   /**
