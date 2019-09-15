@@ -92,8 +92,9 @@ module.exports = (api) => {
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
       const result = await database('addresses').select().where({id: req.params.addressID, person_id: req.params.personID})
-      if (result.length > 0) {
-      address = result[0]
+      const address = result[0]
+      console.log("--------", address)
+      if (address && !address.deleted_at) {
       res
         .status(statusCodes.OK)
         .json(address)
@@ -123,8 +124,10 @@ module.exports = (api) => {
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
   api.delete('/:personID/addresses/:addressID', async (req, res) => {
+    let address = await database('addresses').where({id: req.params.addressID, person_id: req.params.personID}).update({deleted_at: moment().toISOString()}, ['id', 'line1', 'line2', 'city', 'state', 'zip', 'deleted_at'])
+    address = address[0]
     res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+      .status(statusCodes.OK)
+      .json(address)
   })
 }

@@ -82,5 +82,16 @@ describe('People API', () => {
   })
 
   // BONUS!!!
-  it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)')
+  it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)', async () => {
+      let address = await database('addresses').select().where({person_id: fixtures.firstPerson.id})
+      address = address[0]
+      await client
+        .delete(`/v1/people/${fixtures.firstPerson.id}/addresses/${address.id}`)
+        .send(address)
+        .expect(httpStatusCodes.OK)
+        .expect('Content-Type', fixtures.contentTypes.json)
+        .then(resp => {
+          expect(resp.body.deleted_at !== null)
+        })
+  })
 })
