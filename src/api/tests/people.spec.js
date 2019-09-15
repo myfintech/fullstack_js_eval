@@ -1,6 +1,7 @@
 const fixtures = require('./fixtures')
 const httpStatusCodes = require('../lib/httpStatusCodes')
 const { client } = require('./setup/supertestServer')
+const { database } = require('../lib/database')
 const { expect } = require('chai')
 
 describe('People API', () => {
@@ -52,8 +53,23 @@ describe('People API', () => {
     .expect(httpStatusCodes.OK)
   }) 
 
-  it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id')
-    // .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.}`)
+  it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id', async () => {
+    let addrID = await database('addresses').select('id').where({person_id: fixtures.firstPerson.id})
+    addrID = addrID[0].id
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${addrID}`)
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        expect(resp.body.person_id === addrID)
+      })
+  })
+
+  it('GET /v1/people/:personID/addresses/:addressID should return a 404 when an incorrect id is used', async () => {
+    await client
+      .get(`/v1/people/99999999/addresses/1`)
+      .expect(httpStatusCodes.NotFound)
+  })
 
   it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id')
 
