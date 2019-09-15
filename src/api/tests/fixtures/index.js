@@ -29,7 +29,8 @@ const firstAddress = {
   line2: faker.address.secondaryAddress(),
   city: faker.address.city(),
   state: faker.address.state(),
-  zip: faker.address.zipCode()
+  zip: faker.address.zipCode(),
+  created_at: moment().toISOString()
 }
 
 module.exports = {
