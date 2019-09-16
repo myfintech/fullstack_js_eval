@@ -57,17 +57,15 @@ describe('People API', () => {
   }) 
 
   it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id', async () => {
-    let addrID = await database('addresses').select('id').where({person_id: fixtures.firstPerson.id})
-    addrID = addrID[0].id
     await client
-      .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${addrID}`)
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`)
       .expect('Content-Type', fixtures.contentTypes.json)
-      .expect(httpStatusCodes.OK)
+      .expect(httpStatusCodes.OK, fixtures.firstAddress)
   })
 
   it('GET /v1/people/:personID/addresses/:addressID should return a 404 when an incorrect id is used', async () => {
     await client
-      .get(`/v1/people/99999999/addresses/1`)
+      .get(`/v1/people/1/addresses/9999999`)
       .expect(httpStatusCodes.NotFound)
   })
 
@@ -83,16 +81,17 @@ describe('People API', () => {
 
   // BONUS!!!
   it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)', async () => {
-      let address = await database('addresses').select().where({person_id: fixtures.firstPerson.id})
-      address = address[0]
       await client
-        .delete(`/v1/people/${fixtures.firstPerson.id}/addresses/${address.id}`)
-        .send(address)
+        .delete(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`)
+        .send(fixtures.firstAddress)
         .expect(httpStatusCodes.OK)
         .expect('Content-Type', fixtures.contentTypes.json)
         .then(resp => {
           expect(!!resp.body.deleted_at)
         })
+      await client
+        .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`)
+        .expect(httpStatusCodes.NotFound)
     })
 })
 

@@ -91,9 +91,9 @@ module.exports = (api) => {
    * Retrieve an address by it's addressID and personID
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
-      const result = await database('addresses').select().where({id: req.params.addressID, person_id: req.params.personID})
+      const result = await database('addresses').select('id', 'person_id', 'line1', 'line2', 'city', 'state', 'zip').where({id: req.params.addressID, person_id: req.params.personID, deleted_at: null})
       const address = result[0]
-      if (!!address && !address.deleted_at) {
+      if (!!address) {
       res
         .status(statusCodes.OK)
         .json(address)
@@ -109,11 +109,10 @@ module.exports = (api) => {
    * List all addresses belonging to a personID
    **/
   api.get('/:personID/addresses', async (req, res) => {
-    const results = await database('addresses').select().where({person_id: req.params.personID})
-    const validAddresses = results.filter(result => !result.deleted_at)
+    const results = await database('addresses').select().where({person_id: req.params.personID, deleted_at: null})
     res
       .status(statusCodes.OK)
-      .json(validAddresses)
+      .json(results)
   })
 
   /**
