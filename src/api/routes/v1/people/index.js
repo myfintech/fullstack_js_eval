@@ -271,7 +271,7 @@ module.exports = (api) => {
 
     try {
 
-      database
+      result = await database
         .select("deleted_at")
         .from("addresses")
         .where({ id: addressId })
