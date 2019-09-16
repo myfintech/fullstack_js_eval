@@ -267,8 +267,6 @@ module.exports = (api) => {
 
     }
 
-    console.log(result);
-
     try {
 
       result = await database
@@ -284,7 +282,9 @@ module.exports = (api) => {
 
     }
 
-    res.status(statusCodes.OK);
+    res
+      .status(statusCodes.OK)
+      .json();
 
   });
 };

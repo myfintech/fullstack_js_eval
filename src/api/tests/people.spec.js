@@ -80,7 +80,10 @@ describe('People API', () => {
   // BONUS!!!
   it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)', async () => {
     await client
-      .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`)
+      .delete(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`)
       .expect(httpStatusCodes.OK);
+    // .then(resp => {
+    //   expect(resp.body).to.be.undefined();
+    // });
   });
 });
