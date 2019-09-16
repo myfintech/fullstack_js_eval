@@ -60,7 +60,7 @@ describe('People API', () => {
       .expect(httpStatusCodes.OK, fixtures.firstAddress);
   });
 
-  // Added one more spec!
+  // ADDED ONE MORE SPEC!
   // it('GET /v1/people/:personID/addresses/:addressID should return a 404 when an incorrect address id is used', async () => {
   //   await client
   //     .get(`/v1/people/${fixtures.firstPerson.id}//addresses/99999999`)
@@ -82,8 +82,5 @@ describe('People API', () => {
     await client
       .delete(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`)
       .expect(httpStatusCodes.OK);
-    // .then(resp => {
-    //   expect(resp.body).to.be.undefined();
-    // });
   });
 });

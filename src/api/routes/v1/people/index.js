@@ -10,6 +10,7 @@ module.exports = (api) => {
    */
   api.post('/', async (req, res, next) => {
 
+    // create a new person
     const newPerson = ({
 
       first_name: req.body.first_name,
@@ -26,7 +27,7 @@ module.exports = (api) => {
     let result;
 
     try {
-
+      // insert the person into the database
       [result] = await database
         .from("people")
         .insert(newPerson, ['id']);
@@ -37,12 +38,14 @@ module.exports = (api) => {
       return;
     }
 
+    // store id inside of the object recieved from the database query
     newPerson.id = result.id;
 
     res
       .contentType("json")
       .status(statusCodes.OK)
       .json(newPerson);
+
   });
 
   /**
@@ -51,12 +54,13 @@ module.exports = (api) => {
    */
   api.get('/:personID', async (req, res) => {
 
+    // get the params from the request
     const personId = req.params.personID;
 
     let result;
 
     try {
-
+      // fetch the person from the database
       [result] = await database
         .select("id", "first_name", "last_name", "title", "company", "birthday", "created_at")
         .from("people")
@@ -71,7 +75,7 @@ module.exports = (api) => {
     }
 
     if (result) {
-
+      // if we happen to get a result, we can format the birthday
       result.birthday = moment(result.birthday).format("YYYY-MM-DD");
 
       res
@@ -97,7 +101,7 @@ module.exports = (api) => {
     let result;
 
     try {
-
+      // retrieve a list of people from the database
       result = await database
         .select()
         .from("people")
@@ -129,6 +133,7 @@ module.exports = (api) => {
    **/
   api.post('/:personID/addresses', async (req, res) => {
 
+    // create a new address and associate it with a specific person ID
     const newAddress = ({
 
       person_id: req.body.person_id,
@@ -146,7 +151,7 @@ module.exports = (api) => {
     let result;
 
     try {
-
+      // insert that new address into the database and get back the id associated with that entry
       [result] = await database
         .from("addresses")
         .insert(newAddress, ['id']);
@@ -158,6 +163,7 @@ module.exports = (api) => {
 
     }
 
+    // set the id for the address within the object
     newAddress.id = result.id;
 
     res
@@ -173,12 +179,15 @@ module.exports = (api) => {
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
 
+    // get person ID and address ID from the params
     const personId = req.params.personID;
     const addressId = req.params.addressID;
+
     let result;
 
     try {
 
+      // retrieve the address by its person ID and address ID from the database
       [result] = await database
         .select("id", "person_id", "line1", "city", "state", "zip", "created_at")
         .from("addresses")
@@ -218,7 +227,7 @@ module.exports = (api) => {
     let result;
 
     try {
-
+      // retrieve a list of addresses from the database
       result = await database
         .select()
         .from("addresses")
@@ -252,6 +261,8 @@ module.exports = (api) => {
     const deletedTime = moment().toISOString();
     let result;
 
+    // this may be the suboptimal solution since I need to access the database on two separate occassions to update both columns for the peoples table and the addresses table
+
     try {
 
       result = await database
@@ -282,6 +293,7 @@ module.exports = (api) => {
 
     }
 
+    // My thought process here was that since we "deleted" the user, we only have to return a status of 200 to assure that the process went by smoothly
     res
       .status(statusCodes.OK)
       .json();
