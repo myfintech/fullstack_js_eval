@@ -64,8 +64,7 @@ module.exports = (api) => {
       [result] = await database
         .select("id", "first_name", "last_name", "title", "company", "birthday", "created_at")
         .from("people")
-        .where({ id: personId })
-        .whereNull("deleted_at");
+        .where({ id: personId });
 
     } catch (err) {
 
@@ -104,8 +103,7 @@ module.exports = (api) => {
       // retrieve a list of people from the database
       result = await database
         .select()
-        .from("people")
-        .whereNull("deleted_at");
+        .from("people");
 
     } catch (err) {
 
@@ -258,33 +256,15 @@ module.exports = (api) => {
 
     const personId = req.params.personID;
     const addressId = req.params.addressID;
-    const deletedTime = moment().toISOString();
     let result;
 
-    // this may be the suboptimal solution since I need to access the database on two separate occassions to update both columns for the peoples table and the addresses table
-
     try {
-
-      result = await database
-        .select("deleted_at")
-        .from("people")
-        .where({ id: personId })
-        .update({ deleted_at: deletedTime });
-
-    } catch (err) {
-
-      console.log(err);
-      return;
-
-    }
-
-    try {
-
-      result = await database
+      // retrieve the table with the specified person ID and address ID
+      [result] = await database
         .select("deleted_at")
         .from("addresses")
-        .where({ id: addressId })
-        .update({ deleted_at: deletedTime });
+        .where({ id: addressId, person_id: personId })
+        .update({ deleted_at: moment().toISOString() }, ["id"]);
 
     } catch (err) {
 
@@ -292,11 +272,10 @@ module.exports = (api) => {
       return;
 
     }
-
-    // My thought process here was that since we "deleted" the user, we only have to return a status of 200 to assure that the process went by smoothly
+    // respond with the id of the deleted table
     res
       .status(statusCodes.OK)
-      .json();
+      .json(result);
 
   });
 };

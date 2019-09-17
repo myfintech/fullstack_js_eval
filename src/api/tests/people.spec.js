@@ -81,6 +81,9 @@ describe('People API', () => {
   it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)', async () => {
     await client
       .delete(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`)
-      .expect(httpStatusCodes.OK);
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        resp.body.id = fixtures.firstAddress.id;
+      });
   });
 });
