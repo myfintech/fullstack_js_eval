@@ -11,8 +11,8 @@ module.exports = api => {
     try {
       const newPerson = await database('people')
         .returning('*')
-        .insert(req.body)[0];
-      res.status(statusCodes.OK).json(newPerson);
+        .insert(req.body);
+      res.status(statusCodes.OK).json(newPerson[0]);
     } catch (error) {
       next(error);
     }
@@ -25,13 +25,12 @@ module.exports = api => {
   api.get('/:personID', async (req, res, next) => {
     try {
       const retrievedPerson = await database('people')
-        .where({ id: req.params.personId })
+        .where({ id: req.params.personID })
         .first();
-      // const retrievedPerson = await database('people').where('id', req.params.personId).first();
       if (retrievedPerson) {
         res.status(statusCodes.OK).json(retrievedPerson);
       } else {
-        res.status(statusCodes.NotFound);
+        res.sendStatus(statusCodes.NotFound);
       }
     } catch (error) {
       next(error);
