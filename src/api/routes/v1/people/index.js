@@ -42,9 +42,12 @@ module.exports = api => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+    try {
+      const allPeople = await database('people').select('*');
+      res.status(statusCodes.OK).json(allPeople);
+    } catch (error) {
+      next(error);
+    }
   });
 
   /**
