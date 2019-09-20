@@ -99,10 +99,16 @@ module.exports = api => {
    * GET /v1/people/:personID/addresses
    * List all addresses belonging to a personID
    **/
-  api.get('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+  api.get('/:personID/addresses', async (req, res, next) => {
+    try {
+      const allAddresses = await database('addresses').where({
+        person_id: req.params.personID,
+        deleted_at: null,
+      });
+      res.status(statusCodes.OK).json(allAddresses);
+    } catch (error) {
+      next(error);
+    }
   });
 
   /**
