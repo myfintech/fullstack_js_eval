@@ -61,7 +61,7 @@ module.exports = api => {
    * POST /v1/people/:personID/addresses
    * Create a new address belonging to a person
    **/
-  api.post('/:personID/addresses', async (req, res) => {
+  api.post('/:personID/addresses', async (req, res, next) => {
     res
       .status(statusCodes.NotImplemented)
       .json(httpErrorMessages.NotImplemented);
