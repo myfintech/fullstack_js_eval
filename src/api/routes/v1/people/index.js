@@ -118,9 +118,21 @@ module.exports = api => {
    * Set it's deleted_at timestamp
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
-  api.delete('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+  api.delete('/:personID/addresses/:addressID', async (req, res, next) => {
+    try {
+      let deletedAddress = await database('addresses')
+        .where({
+          person_id: req.params.personID,
+          id: req.params.addressID,
+          deleted_at: null,
+        })
+        .returning('*')
+        .update({
+          deleted_at: moment().toISOString(),
+        });
+      res.status(statusCodes.OK).json(deletedAddress);
+    } catch (error) {
+      next(error);
+    }
   });
 };
