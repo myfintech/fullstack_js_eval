@@ -91,7 +91,9 @@ describe('People API', () => {
   });
 
   // BONUS!!!
-  it(
-    'DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)'
-  );
+  it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)', async () => {
+    await client
+      .delete(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.address.id}`)
+      .expect(httpStatusCodes.OK);
+  });
 });

@@ -1,6 +1,7 @@
 const statusCodes = require('../../../lib/httpStatusCodes');
 const httpErrorMessages = require('../../../lib/httpErrorMessages');
 const { database } = require('../../../lib/database');
+const moment = require('moment');
 
 module.exports = api => {
   /**
@@ -120,17 +121,15 @@ module.exports = api => {
    **/
   api.delete('/:personID/addresses/:addressID', async (req, res, next) => {
     try {
-      let deletedAddress = await database('addresses')
+      await database('addresses')
         .where({
-          person_id: req.params.personID,
           id: req.params.addressID,
           deleted_at: null,
         })
-        .returning('*')
         .update({
           deleted_at: moment().toISOString(),
         });
-      res.status(statusCodes.OK).json(deletedAddress);
+      res.sendStatus(statusCodes.OK);
     } catch (error) {
       next(error);
     }
