@@ -76,10 +76,23 @@ module.exports = api => {
    * GET /v1/people/:personID/addresses/:addressID
    * Retrieve an address by it's addressID and personID
    **/
-  api.get('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+  api.get('/:personID/addresses/:addressID', async (req, res, next) => {
+    try {
+      const retrievedAddress = await database('addresses')
+        .where({
+          id: req.params.addressID,
+          person_id: req.params.personID,
+          deleted_at: null,
+        })
+        .first();
+      if (retrievedAddress) {
+        res.status(statusCodes.OK).json(retrievedAddress);
+      } else {
+        res.sendStatus(statusCodes.NotFound);
+      }
+    } catch (error) {
+      next(error);
+    }
   });
 
   /**
