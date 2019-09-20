@@ -44,20 +44,17 @@ describe('People API', () => {
    * ======================================================
    */
 
-  // it('POST /v1/people/:personID/addresses should create a new address', async() => {
-  //   await client
-  //     .post(`/v1/people/${fixtures.firstPerson.id}/addresses`)
-  //     .send(fixtures.newAddress)
-  //     .expect(httpStatusCodes.OK)
-  //     .expect('Content-Type', fixtures.contentTypes.json)
-  //     .then(resp => {
-  //       expect(resp.body.person_id).to.equal(fixtures.firstPerson.id)
-  //       console.log('resp.body', resp)
-  //       fixtures.newAddress = resp.body
-
-
-  //     })
-  // })
+  it('POST /v1/people/:personID/addresses should create a new address', async() => {
+    await client
+      .post(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+      .send(fixtures.address)
+      .expect(httpStatusCodes.OK)
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .then(resp => {
+        fixtures.address = resp.body
+        expect(resp.body.person_id).to.equal(fixtures.firstPerson.id)
+      })
+  })
 
   it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id')
   it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id')
