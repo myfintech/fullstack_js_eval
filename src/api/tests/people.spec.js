@@ -50,11 +50,26 @@ describe('People API', () => {
       .expect('Content-Type', fixtures.contentTypes.json)
       .then(resp => {
         expect(resp.body.person_id).to.equal(fixtures.firstPerson.id);
+        expect(resp.body.zip).to.equal(fixtures.address.zip);
         fixtures.address = resp.body;
       });
   });
 
-  it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id');
+  it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id', async () => {
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.address.id}`)
+      .expect(httpStatusCodes.OK)
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .then(resp => {
+        expect(resp.body.person_id).to.equal(fixtures.firstPerson.id);
+        expect(resp.body.id).to.equal(fixtures.address.id);
+      });
+  });
+
+  // it('GET /v1/people/:personID/addresses/:addressID should return a 404 when an incorrect person id is used', async () => {
+  //   await client.get(`/v1/people/99999999`).expect(httpStatusCodes.NotFound);
+  // });
+
   it(
     'GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id'
   );
