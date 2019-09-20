@@ -20,8 +20,6 @@ describe('People API', () => {
       .expect(httpStatusCodes.OK, fixtures.firstPerson)
   })
 
-
-
   it('GET /v1/people/:personID should return a 404 when an incorrect id is used', async () => {
     await client
       .get(`/v1/people/99999999`)
