@@ -57,7 +57,9 @@ describe('People API', () => {
 
   it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id', async () => {
     await client
-      .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.address.id}`)
+      .get(
+        `/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.address.id}`
+      )
       .expect(httpStatusCodes.OK)
       .expect('Content-Type', fixtures.contentTypes.json)
       .then(resp => {
@@ -67,16 +69,26 @@ describe('People API', () => {
   });
 
   it('GET /v1/people/:personID/addresses/:addressID should return a 404 when an incorrect personID is used', async () => {
-    await client.get(`/v1/people/99999999/addresses/${fixtures.address.id}`).expect(httpStatusCodes.NotFound);
+    await client
+      .get(`/v1/people/99999999/addresses/${fixtures.address.id}`)
+      .expect(httpStatusCodes.NotFound);
   });
 
   it('GET /v1/people/:personID/addresses/:addressID should return a 404 when an incorrect addressID is used', async () => {
-    await client.get(`/v1/people/${fixtures.firstPerson.id}/addresses/99999999`).expect(httpStatusCodes.NotFound);
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses/99999999`)
+      .expect(httpStatusCodes.NotFound);
   });
 
-  it(
-    'GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id'
-  );
+  it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id', async () => {
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+      .expect(httpStatusCodes.OK)
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .then(resp => {
+        expect(resp.body).to.have.lengthOf.above(0);
+      });
+  });
 
   // BONUS!!!
   it(
