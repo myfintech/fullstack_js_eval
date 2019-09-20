@@ -66,9 +66,13 @@ describe('People API', () => {
       });
   });
 
-  // it('GET /v1/people/:personID/addresses/:addressID should return a 404 when an incorrect person id is used', async () => {
-  //   await client.get(`/v1/people/99999999`).expect(httpStatusCodes.NotFound);
-  // });
+  it('GET /v1/people/:personID/addresses/:addressID should return a 404 when an incorrect personID is used', async () => {
+    await client.get(`/v1/people/99999999/addresses/${fixtures.address.id}`).expect(httpStatusCodes.NotFound);
+  });
+
+  it('GET /v1/people/:personID/addresses/:addressID should return a 404 when an incorrect addressID is used', async () => {
+    await client.get(`/v1/people/${fixtures.firstPerson.id}/addresses/99999999`).expect(httpStatusCodes.NotFound);
+  });
 
   it(
     'GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id'
