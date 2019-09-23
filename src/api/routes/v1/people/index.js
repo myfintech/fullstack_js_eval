@@ -1,6 +1,10 @@
-const statusCodes = require('../../../lib/httpStatusCodes')
-const httpErrorMessages = require('../../../lib/httpErrorMessages')
-const { database } = require('../../../lib/database')
+// absolute imports
+const moment = require('moment');
+
+// relative imports
+const statusCodes = require('../../../lib/httpStatusCodes');
+const httpErrorMessages = require('../../../lib/httpErrorMessages');
+const { database } = require('../../../lib/database');
 
 module.exports = (api) => {
   /**
@@ -8,9 +12,20 @@ module.exports = (api) => {
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const records = await database('people')
+        .insert(req.body)
+        .returning('*');
+
+      const savedRecord = records[0];
+      res
+        .status(statusCodes.OK)
+        .json(savedRecord);
+    } catch (err) {
+      res
+      .status(statusCodes.InternalServerError)
+      .json(err);
+    }
   })
 
   /**
@@ -18,9 +33,25 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const {
+        personID: person_id,
+      } = req.params;
+      const record = await database('people')
+        .where({ id: req.params.personID })
+        .first();
+      if (!record) {
+        throw new Error(`No record found for id ${person_id}`);
+      }
+      res
+        .status(statusCodes.OK)
+        .type('application/json')
+        .json(record);
+    } catch (err) {
+      res
+        .status(statusCodes.NotFound)
+        .json();
+    }
   })
 
   /**
@@ -28,9 +59,18 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const records = await database('people')
+        .select('*');
+      res
+        .status(statusCodes.OK)
+        .type('application/json')
+        .json(records);
+    } catch (err) {
+      res
+        .status(statusCodes.InternalServerError)
+        .json();
+    }
   })
 
   /**
@@ -45,9 +85,26 @@ module.exports = (api) => {
    * Create a new address belonging to a person
    **/
   api.post('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const {
+        personID: person_id,
+      } = req.params;
+
+      const records = await database('addresses')
+        .insert({
+          person_id,
+          ...req.body
+        })
+        .returning('*');
+      const savedRecord = records[0];
+      res
+        .status(statusCodes.OK)
+        .json(savedRecord);
+    } catch (err) {
+      res
+        .status(statusCodes.InternalServerError)
+        .json(err);
+    }
   })
 
   /**
@@ -55,9 +112,32 @@ module.exports = (api) => {
    * Retrieve an address by it's addressID and personID
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const {
+        addressID: id,
+        personID: person_id,
+      } = req.params;
+
+      const record = await database('addresses')
+        .where({
+          id,
+          person_id,
+          deleted_at: null,
+        })
+        .first();
+
+        if (!record) {
+          throw new Error(`No record found for person_id ${person_id} / id ${id}`);
+        }
+      res
+        .status(statusCodes.OK)
+        .type('application/json')
+        .json(record);
+    } catch (err) {
+      res
+        .status(statusCodes.NotFound)
+        .json();
+    }
   })
 
   /**
@@ -65,9 +145,25 @@ module.exports = (api) => {
    * List all addresses belonging to a personID
    **/
   api.get('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const {
+      personID: person_id,
+    } = req.params;
+    database('addresses')
+    .select('*')
+    .where({
+      person_id,
+      deleted_at: null,
+    })
+    .then(result => {
+      res
+      .status(statusCodes.OK)
+      .type('application/json')
+      .json(result);
+    })
+    .catch(_ => {
+      res
+      .status(statusCodes.InternalServerError)
+    });
   })
 
   /**
@@ -78,8 +174,26 @@ module.exports = (api) => {
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
   api.delete('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const {
+        addressID: id,
+        personID: person_id,
+      } = req.params;
+      await database('addresses')
+        .where({
+          id,
+          person_id,
+        })
+        .update({
+          deleted_at: moment().format(),
+        });
+      res
+        .status(statusCodes.OK)
+        .type('application/json')
+        .json();
+    } catch (err) {
+      res
+        .status(statusCodes.InternalServerError)
+    }
   })
 }

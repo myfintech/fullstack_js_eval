@@ -44,10 +44,81 @@ describe('People API', () => {
    * ======================================================
    */
 
-  it('POST /v1/people/:personID/addresses should create a new address')
-  it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id')
-  it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id')
+  it('POST /v1/people/:personID/addresses should create a new address', async() => {
+    await client
+      .post(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+      .send(fixtures.firstAddress)
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        fixtures.firstAddress = resp.body;
+        expect(resp.body).to.deep.equal(fixtures.firstAddress);
+      })
+  })
 
+  it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id', async() => {
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstPerson.id}`)
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        expect(resp.body).to.deep.equal(fixtures.firstAddress);
+      })
+  })
+
+  it('GET /v1/people/:personID/addresses/:addressID should return a 404 when no person is found for the personID', async() => {
+    await client
+      .get(`/v1/people/99999999/addresses/${fixtures.firstPerson.id}`)
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .expect(httpStatusCodes.NotFound)
+  })
+
+  it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id', async() => {
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        expect(resp.body).to.deep.equal([
+          fixtures.firstAddress,
+        ])
+      })
+  })
+
+  describe('Deleting an address', () => {
+    before(async () => {
+      await client
+        .post(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+        .send(fixtures.secondAddress)
+        .then(resp => {
+          fixtures.secondAddress = resp.body;
+        })
+    })
   // BONUS!!!
-  it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)')
+    it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)', async () => {
+      await client
+        .delete(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.secondAddress.id}`)
+        .expect('Content-Type', fixtures.contentTypes.json)
+        .expect(httpStatusCodes.OK)
+    })
+
+    it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id, excluding deleted addresses', async () => {
+      await client
+        .get(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+        .expect('Content-Type', fixtures.contentTypes.json)
+        .expect(httpStatusCodes.OK)
+        .then(resp => {
+          expect(resp.body).to.deep.equal([
+            fixtures.firstAddress,
+          ])
+        })
+    })
+
+    it('GET /v1/people/:personID/addresses/:addressID should return a 404 when the address has been deleted', async () => {
+      await client
+        .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.secondAddress.id}`)
+        .expect('Content-Type', fixtures.contentTypes.json)
+        .expect(httpStatusCodes.NotFound)
+    })
+  })
 })
