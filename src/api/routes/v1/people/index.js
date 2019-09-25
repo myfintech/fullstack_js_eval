@@ -50,10 +50,15 @@ module.exports = api => {
    * POST /v1/people/:personID/addresses
    * Create a new address belonging to a person
    **/
-  api.post('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+  api.post('/:personID/addresses', async (req, res, next) => {
+    try {
+      const data = await database('addresses')
+        .insert(req.body, '*')
+        .where('person_id', req.params.personID);
+      res.status(200).json(data[0]);
+    } catch (error) {
+      next(error);
+    }
   });
 
   /**
@@ -61,9 +66,15 @@ module.exports = api => {
    * Retrieve an address by it's addressID and personID
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+    try {
+      const data = await database('addresses')
+        .where('person_id', req.params.personID)
+        .andWhere('id', req.params.addressID)
+        .whereNotNull('deleted_at');
+      res.status(200).json(data[0]);
+    } catch (error) {
+      res.status(404).send(error);
+    }
   });
 
   /**
@@ -71,9 +82,11 @@ module.exports = api => {
    * List all addresses belonging to a personID
    **/
   api.get('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+    const data = await database('addresses')
+      .select('*')
+      .where('person_id', req.params.personID)
+      .whereNotNull('deleted_at');
+    res.status(200).json(data[0]);
   });
 
   /**
@@ -84,8 +97,10 @@ module.exports = api => {
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
   api.delete('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+    const data = await database('addresses')
+      .where('person_id', req.params.personID)
+      .andWhere('id', req.params.addressID)
+      .update('deleted_at', 'moment');
+    res.status(202).json(data[0]);
   });
 };
