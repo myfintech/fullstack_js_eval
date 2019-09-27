@@ -8,30 +8,42 @@ module.exports = (api) => {
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+    try {
+      const { first_name, last_name, birthday, company, title } = req.body;
+      const data = await database('people').insert({ first_name, last_name, birthday, company, title }, '*');
+      res.status(200).json(data[0]);
+    } catch (error) {
+      next(error);
+    }
+  });
 
   /**
    * GET /v1/people/:personID
    * Retrieve a person by their ID
    */
-  api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+  api.get('/:personID', async (req, res, next) => {
+    try {
+      const personID = req.params.personID;
+      const data = await database('people').where('id', personID);
+      if (!data[0]) res.status(404).send('that person was not found.');
+      else res.status(200).json(data[0]);
+    } catch (error) {
+      next(error);
+    }
+  });
 
   /**
    * GET /v1/people
    * Retrieve a list of people
    */
-  api.get('/', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+  api.get('/', async (req, res, next) => {
+    try {
+      const data = await database('people').select('*');
+      res.status(200).send(data);
+    } catch (error) {
+      next(error);
+    }
+  });
 
   /**
    * Do not modify beyond this point until you have reached
