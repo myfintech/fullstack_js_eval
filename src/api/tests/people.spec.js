@@ -44,9 +44,37 @@ describe('People API', () => {
    * ======================================================
    */
 
-  it('POST /v1/people/:personID/addresses should create a new address')
-  it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id')
-  it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id')
+  it('POST /v1/people/:personID/addresses should create a new address', async () => {
+    await client
+      .post(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+      .send({
+        line1: '8080 Mantl Ave',
+        line2: '8080',
+        city: 'Brooklyn',
+        state: 'New York',
+        zip: '12345'
+      })
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        fixtures.secondAddress = resp.body;
+      });
+  });
+  it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id', async () => {
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.secondAddress.id}`)
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .expect(httpStatusCodes.OK)
+  });
+  it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id', async () => {
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        expect(resp.body).to.have.lengthOf.above(0)
+      })
+  })
 
   // BONUS!!!
   it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)')
