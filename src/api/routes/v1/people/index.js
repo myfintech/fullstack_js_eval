@@ -1,6 +1,6 @@
 const statusCodes = require("../../../lib/httpStatusCodes");
 const httpErrorMessages = require("../../../lib/httpErrorMessages");
-const { database, knex } = require("../../../lib/database");
+const { database } = require("../../../lib/database");
 
 module.exports = api => {
   /**
@@ -29,6 +29,7 @@ module.exports = api => {
         .where({
           id: req.params.personID
         })
+        .orWhereNotNull("deleted_at")
         .select("id");
 
       if (foundUser) {
@@ -107,6 +108,7 @@ module.exports = api => {
           id: req.params.addressID,
           person_id: req.params.personID
         })
+        .orWhereNotNull("deleted_at")
         .select("id");
       if (foundAddress) {
         res.status(200).send(foundAddress);
