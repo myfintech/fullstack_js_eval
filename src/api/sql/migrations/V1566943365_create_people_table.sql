@@ -1,3 +1,16 @@
+CREATE TABLE "people" (
+    id BIGSERIAL PRIMARY KEY,
+    first_name VARCHAR(256) NOT NULL,
+    last_name VARCHAR(256) NOT NULL,
+    birthday DATE NOT NULL,
+    company VARCHAR(256) NOT NULL,
+    title VARCHAR(256) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ,
+    deleted_at TIMESTAMPTZ
+);
+
+
 /**
  * Write SQL that creates a table named 'people'
  * it should match this schema
