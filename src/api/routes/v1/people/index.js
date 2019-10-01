@@ -3,7 +3,7 @@ const httpErrorMessages = require('../../../lib/httpErrorMessages')
 const { database } = require('../../../lib/database')
 const moment = require('moment')
 
-module.exports = (api) => {
+module.exports = api => {
   /**
    * POST /v1/people
    * Create a new person
@@ -33,11 +33,9 @@ module.exports = (api) => {
           if (people.length) {
             res.status(200).json({ id: people[0].id });
           } else {
-            res
-              .status(404)
-              .json({
-                error: `Could not find person with id ${req.params.personID}`
-              });
+            res.status(404).json({
+              error: `Could not find person with id ${req.params.personID}`
+            });
           }
         });
     } catch (error) {
@@ -90,21 +88,20 @@ module.exports = (api) => {
    * Retrieve an address by it's addressID and personID
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
-    console.log('params', req.params);
     try {
       await database('addresses')
         .where({ person_id: req.params.personID, id: req.params.addressID })
         .select()
         .then(address => {
-          if (address.length){
-          res.status(200).json({ id: address[0].id })
-        } else {
-          res
-              .status(404)
-              .json({
-                error: `Could not find person with id ${req.params.personID} and address id ${req.params.addressID}`
-              });
-        }
+          if (address.length) {
+            address.filter(element => element.deleted_at)
+            console.log(address)
+            res.status(200).json({ id: address[0].id });
+          } else {
+            res.status(404).json({
+              error: `Could not find person with id ${req.params.personID} and address id ${req.params.addressID}`
+            });
+          }
         });
     } catch (error) {
       console.error(error);
@@ -149,4 +146,4 @@ module.exports = (api) => {
       console.error(error);
     }
   });
-}
+};
