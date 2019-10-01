@@ -23,10 +23,20 @@ const firstPerson = {
   birthday: moment(faker.date.between('01-01-1985', '01-01-2000')).format('YYYY-MM-DD'),
   created_at: moment().toISOString()
 }
+const firstAddress = {
+  line1: faker.address.streetAddress(false),
+  line2: faker.address.secondaryAddress(),
+  city: faker.address.city(),
+  state: faker.address.state(true),
+  zip: faker.address.zipCode(),
+  created_at: moment().toISOString()
+  
+}
 
 module.exports = {
   contentTypes,
   firstPerson,
+  firstAddress,
   peopleSchema,
   addressesSchema,
   passingRootServerResponse,
