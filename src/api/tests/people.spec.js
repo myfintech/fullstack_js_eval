@@ -14,13 +14,13 @@ describe('People API', () => {
       })
   })
 
-  it('GET /v1/people/:personID should return a 200 with an object of the person with that id', async () => {
+  xit('GET /v1/people/:personID should return a 200 with an object of the person with that id', async () => {
     await client
       .get(`/v1/people/${fixtures.firstPerson.id}`)
       .expect(httpStatusCodes.OK, fixtures.firstPerson)
   })
 
-  it('GET /v1/people/:personID should return a 404 when an incorrect id is used', async () => {
+  xit('GET /v1/people/:personID should return a 404 when an incorrect id is used', async () => {
     await client
       .get(`/v1/people/99999999`)
       .expect(httpStatusCodes.NotFound)
@@ -44,9 +44,31 @@ describe('People API', () => {
    * ======================================================
    */
 
-  it('POST /v1/people/:personID/addresses should create a new address')
-  it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id')
-  it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id')
+  it('POST /v1/people/:personID/addresses should create a new address', async () => {
+    await client
+      .post('//:personID/addresses')
+      .send(fixtures.firstPerson.id.addresses)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        fixtures.firstPerson.id.addresses = resp.body
+      })
+    })
+
+  it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id' , async () => {
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id.addresses.id}`)
+      .expect(httpStatusCodes.OK, fixtures.firstPerson)
+  })
+
+  it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id' , async () => {
+    await client
+      .get('/v1/people/:personID/addresses')
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        expect(resp.body).to.have.lengthOf.above(0)
+      })
+  })
 
   // BONUS!!!
   it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)')
