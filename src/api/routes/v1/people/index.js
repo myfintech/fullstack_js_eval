@@ -13,8 +13,18 @@ module.exports = api => {
       if (!newPerson) {
         res.sendStatus(404);
       } else {
-        await database('people').insert(newPerson);
-        res.status(200).json(newPerson);
+        let [person] = await database('people')
+          .returning([
+            'id',
+            'first_name',
+            'last_name',
+            'title',
+            'company',
+            'birthday',
+            'created_at'
+          ])
+          .insert([newPerson]);
+        res.status(200).json(person);
       }
     } catch (err) {
       next(err);
@@ -28,13 +38,28 @@ module.exports = api => {
   api.get('/:personID', async (req, res, next) => {
     try {
       let personID = req.params.personID;
-      console.log('------', req.params);
 
       if (!personID) {
         res.sendStatus(404);
       } else {
-        let person = await database('people').where('id', personID);
-        res.status(200).json(person);
+        let [person] = await database('people')
+          .returning([
+            'id',
+            'first_name',
+            'last_name',
+            'title',
+            'company',
+            'birthday',
+            'created_at'
+          ])
+          .where('id', personID);
+        if (person) {
+          delete person.updated_at;
+          delete person.deleted_at;
+          res.status(200).json(person);
+        } else {
+          res.sendStatus(404);
+        }
       }
     } catch (err) {
       next(err);
@@ -45,10 +70,13 @@ module.exports = api => {
    * GET /v1/people
    * Retrieve a list of people
    */
-  api.get('/', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+  api.get('/', async (req, res, next) => {
+    try {
+      let [people] = await database('people').select('*');
+      res.status(200).json([people]);
+    } catch (err) {
+      next(err);
+    }
   });
 
   /**
@@ -63,9 +91,8 @@ module.exports = api => {
    * Create a new address belonging to a person
    **/
   api.post('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+    console.log(req.params.personID);
+    res.status(200).json(httpErrorMessages.NotImplemented);
   });
 
   /**
