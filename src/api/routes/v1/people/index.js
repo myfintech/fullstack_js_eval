@@ -1,27 +1,45 @@
-const statusCodes = require('../../../lib/httpStatusCodes')
-const httpErrorMessages = require('../../../lib/httpErrorMessages')
-const { database } = require('../../../lib/database')
+const statusCodes = require('../../../lib/httpStatusCodes');
+const httpErrorMessages = require('../../../lib/httpErrorMessages');
+const { database } = require('../../../lib/database');
 
-module.exports = (api) => {
+module.exports = api => {
   /**
    * POST /v1/people
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+    try {
+      let newPerson = req.body;
+      if (!newPerson) {
+        res.sendStatus(404);
+      } else {
+        await database('people').insert(newPerson);
+        res.status(200).json(newPerson);
+      }
+    } catch (err) {
+      next(err);
+    }
+  });
 
   /**
    * GET /v1/people/:personID
    * Retrieve a person by their ID
    */
-  api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+  api.get('/:personID', async (req, res, next) => {
+    try {
+      let personID = req.params.personID;
+      console.log('------', req.params);
+
+      if (!personID) {
+        res.sendStatus(404);
+      } else {
+        let person = await database('people').where('id', personID);
+        res.status(200).json(person);
+      }
+    } catch (err) {
+      next(err);
+    }
+  });
 
   /**
    * GET /v1/people
@@ -30,8 +48,8 @@ module.exports = (api) => {
   api.get('/', async (req, res) => {
     res
       .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+      .json(httpErrorMessages.NotImplemented);
+  });
 
   /**
    * Do not modify beyond this point until you have reached
@@ -47,8 +65,8 @@ module.exports = (api) => {
   api.post('/:personID/addresses', async (req, res) => {
     res
       .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+      .json(httpErrorMessages.NotImplemented);
+  });
 
   /**
    * GET /v1/people/:personID/addresses/:addressID
@@ -57,8 +75,8 @@ module.exports = (api) => {
   api.get('/:personID/addresses/:addressID', async (req, res) => {
     res
       .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+      .json(httpErrorMessages.NotImplemented);
+  });
 
   /**
    * GET /v1/people/:personID/addresses
@@ -67,8 +85,8 @@ module.exports = (api) => {
   api.get('/:personID/addresses', async (req, res) => {
     res
       .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+      .json(httpErrorMessages.NotImplemented);
+  });
 
   /**
    * BONUS!!!!
@@ -80,6 +98,6 @@ module.exports = (api) => {
   api.delete('/:personID/addresses/:addressID', async (req, res) => {
     res
       .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
-}
+      .json(httpErrorMessages.NotImplemented);
+  });
+};
