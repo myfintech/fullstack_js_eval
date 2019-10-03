@@ -12,3 +12,16 @@
  * updated_at timetsamp with timezone
  * deleted_at timetsamp with timezone
  ***/
+
+CREATE TABLE addresses (
+  id bigserial PRIMARY KEY,
+  person_id bigint NOT NULL REFERENCES people(id),
+  line1 character varying (256) NOT NULL,
+  line2 character varying (256) NOT NULL,
+  city character varying (256) NOT NULL,
+  state character varying (256) NOT NULL,
+  zip character varying (256) NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz,
+  deleted_at timestamptz
+);
