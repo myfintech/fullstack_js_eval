@@ -92,26 +92,23 @@ module.exports = api => {
    **/
   api.post('/:personID/addresses', async (req, res, next) => {
     try {
-      let personID = req.params.personID;
+      let personID = Number(req.params.personID);
       if (!personID) {
         res.sendStatus(404);
       } else {
-        let [person] = await database('people')
-          .returning([
-            'id',
-            'first_name',
-            'last_name',
-            'title',
-            'company',
-            'birthday',
-            'created_at'
-          ])
-          .where('id', personID);
-
-        let address = await database('addresses')
-          .insert()
-          .where(person);
-        res.status(200).json(address);
+        const [address] = await database('addresses').insert(
+          {
+            person_id: personID,
+            line1: req.body.line1,
+            line2: req.body.line2,
+            city: req.body.city,
+            state: req.body.state,
+            zip: req.body.zip,
+            created_at: req.body.created_at
+          },
+          ['id']
+        );
+        res.status(200).send(address);
       }
     } catch (err) {
       next(err);
@@ -124,22 +121,20 @@ module.exports = api => {
    **/
   api.get('/:personID/addresses/:addressID', async (req, res, next) => {
     try {
-      let personID = req.params.personID;
-      let addressID = req.params.addressID;
+      let personID = Number(req.params.personID);
+      let addressID = Number(req.params.addressID);
 
-      if (!personID) {
+      const [address] = await database('addresses')
+        .where({
+          id: addressID,
+          person_id: personID
+        })
+        .select('id');
+
+      if (!address) {
         res.sendStatus(404);
       } else {
-        let address = await database('people').join(
-          'addresses',
-          personID,
-          addressID
-        );
-        if (!address) {
-          res.sendStatus(404);
-        } else {
-          res.status(200).json(address);
-        }
+        res.status(200).send(address);
       }
     } catch (err) {
       next(err);
@@ -150,22 +145,17 @@ module.exports = api => {
    * GET /v1/people/:personID/addresses
    * List all addresses belonging to a personID
    **/
-  api.get('/:personID/addresses', async (req, res) => {
-    let personID = req.params.personID;
+  api.get('/:personID/addresses', async (req, res, next) => {
+    try {
+      const addresses = await database('addresses').select();
 
-    if (!personID) {
-      res.sendStatus(404);
-    } else {
-      let address = await database('people').join(
-        'addresses',
-        personID,
-        'person_id'
-      );
-      if (!address) {
+      if (!addresses) {
         res.sendStatus(404);
       } else {
-        res.status(200).json([address]);
+        res.status(200).send(addresses);
       }
+    } catch (err) {
+      next(err);
     }
   });
 
@@ -176,9 +166,21 @@ module.exports = api => {
    * Set it's deleted_at timestamp
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
-  api.delete('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+  api.delete('/:personID/addresses/:addressID', async (req, res, next) => {
+    try {
+      let personID = Number(req.params.personID);
+      let addressID = Number(req.params.addressID);
+
+      await database('addresses')
+        .where({
+          id: addressID,
+          person_id: personID
+        })
+        .update({ deleted_at: database.fn.now() }, ['deleted_at']);
+
+      res.sendStatus(204);
+    } catch (err) {
+      next(err);
+    }
   });
 };
