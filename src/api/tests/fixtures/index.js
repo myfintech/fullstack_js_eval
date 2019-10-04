@@ -26,6 +26,7 @@ const firstPerson = {
   created_at: moment().toISOString()
 };
 
+//added for testing purposes
 const firstAddress = {
   line1: faker.address.streetAddress(),
   line2: faker.address.secondaryAddress(),
