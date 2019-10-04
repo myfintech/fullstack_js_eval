@@ -37,7 +37,7 @@ module.exports = api => {
    */
   api.get('/:personID', async (req, res, next) => {
     try {
-      let personID = req.params.personID;
+      let personID = Number(req.params.personID);
 
       if (!personID) {
         res.sendStatus(404);
