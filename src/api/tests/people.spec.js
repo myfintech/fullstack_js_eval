@@ -44,10 +44,52 @@ describe('People API', () => {
    * ======================================================
    */
 
-  it('POST /v1/people/:personID/addresses should create a new address')
-  it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id')
-  it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id')
+  it('POST /v1/people/:personID/addresses should create a new address', async () => {
+    await client
+    .post(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+    .send(fixtures.address)
+    .expect(httpStatusCodes.OK)
+    .expect('Content-Type', fixtures.contentTypes.json)
+    .then(resp => {
+      const {line1, line2, city, state, zip} = resp.body
+      const returnedAddress = {line1, line2, city, state, zip}
+      expect(returnedAddress).to.deep.equal(fixtures.address)
+      fixtures.address = resp.body
+    })
+  })
+
+  it('GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id', async () => {
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.address.id}`)
+      .expect(httpStatusCodes.OK, fixtures.address)
+  })
+
+  it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id', async () => {
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses/`)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        expect(resp.body).to.have.lengthOf.above(0)
+      })
+  })
 
   // BONUS!!!
-  it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)')
+  it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)', async () => {
+    await client
+      .delete(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.address.id}`)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        expect(resp.body.deleted_at).to.exist
+      })
+  })
+
+  // BONUS BONUS - Added to check the instruction "Update the previous GET endpoints to omit rows where deleted_at is not null"
+  it('GET /v1/people/:personID/addresses should not return any addresses that have been deleted', async () => {
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses/`)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        expect(resp.body).to.have.lengthOf(0)
+      })
+  })
 })
