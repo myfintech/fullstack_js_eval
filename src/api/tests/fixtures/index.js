@@ -24,9 +24,20 @@ const firstPerson = {
   created_at: moment().toISOString()
 }
 
+const firstAddress = {
+  person_id: '1',
+  line1: '92 Brooklyn St',
+  line2: 'Appt 2',
+  city: 'Brooklyn',
+  state: 'NY',
+  zip: '21394',
+  created_at: moment().toISOString()
+}
+
 module.exports = {
   contentTypes,
   firstPerson,
+  firstAddress,
   peopleSchema,
   addressesSchema,
   passingRootServerResponse,
