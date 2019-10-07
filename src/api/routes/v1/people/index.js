@@ -62,9 +62,9 @@ module.exports = (api) => {
    **/
   api.post('/:personID/addresses', async (req, res, next) => {
     try {
-      const personId = req.params.personID
+      const idOfPerson = req.params.personID
       const newAddress = await database('addresses').returning(['id', 'person_id', 'line1', 'line2', 'city', 'state', 'zip', 'created_at', 'updated_at', 'deleted_at'])
-        .where('person_id', personId)
+        .where('person_id', idOfPerson)
         .insert(req.body)
       res
         .json(newAddress[0])
@@ -95,9 +95,9 @@ module.exports = (api) => {
    **/
   api.get('/:personID/addresses', async (req, res, next) => {
     try {
-      const personID = req.params.personID
+      const idOfPerson = req.params.personID
       const allAddresses = await database('addresses').returning(['id', 'person_id', 'line1', 'line2', 'city', 'state', 'zip', 'created_at', 'updated_at', 'deleted_at'])
-        .where('person_id', personID)
+        .where('person_id', idOfPerson)
       res.json(allAddresses)
     }
     catch (error) {next(error)}
