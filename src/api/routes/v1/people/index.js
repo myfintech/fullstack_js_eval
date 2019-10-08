@@ -1,6 +1,4 @@
-const statusCodes = require('../../../lib/httpStatusCodes')
-const httpErrorMessages = require('../../../lib/httpErrorMessages')
-const { database } = require('../../../lib/database')
+const model = require('./model.js')
 
 module.exports = (api) => {
   /**
@@ -8,9 +6,7 @@ module.exports = (api) => {
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    model.create('people', req.body, res)
   })
 
   /**
@@ -18,9 +14,7 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    model.find('people', { id: req.params.personID }, res)
   })
 
   /**
@@ -28,9 +22,7 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    model.search('people', {}, res)
   })
 
   /**
@@ -45,9 +37,9 @@ module.exports = (api) => {
    * Create a new address belonging to a person
    **/
   api.post('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    let address = req.body
+    address.person_id = req.params.personID
+    model.create('addresses', address, res)
   })
 
   /**
@@ -55,9 +47,13 @@ module.exports = (api) => {
    * Retrieve an address by it's addressID and personID
    **/
   api.get('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    let {
+      personID: person_id,
+      addressID: id
+    } = req.params
+
+    let criteria = { person_id, id }
+    model.find('addresses', criteria, res)
   })
 
   /**
@@ -65,9 +61,8 @@ module.exports = (api) => {
    * List all addresses belonging to a personID
    **/
   api.get('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const person_id = req.params.personID
+    model.search('addresses', { person_id }, res)
   })
 
   /**
@@ -78,8 +73,12 @@ module.exports = (api) => {
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
   api.delete('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    let {
+      personID: person_id,
+      addressID: id
+    } = req.params
+
+    let criteria = { person_id, id }
+    model.remove('addresses', criteria, res)
   })
 }
