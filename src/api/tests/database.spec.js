@@ -26,11 +26,14 @@ async function getSchemaForTable (table) {
 
 describe('Database schema', () => {
   it('Should have a correctly structured people table in the public schema', async () => {
-    expect(await getSchemaForTable('people')).to.be.deep.equal(fixtures.peopleSchema)
+    const peopleSchema = await getSchemaForTable('people');
+    expect(peopleSchema).to.be.deep.equal(fixtures.peopleSchema)
   })
 
   it('Should have a correctly structured addresses table in the public schema', async () => {
-    expect(await getSchemaForTable('addresses')).to.be.deep.equal(fixtures.addressesSchema.structure)
-    expect(await getFKConstraintsForTable('addresses')).to.be.deep.equal(fixtures.addressesSchema.foreignKey)
+    const addressesSchema = await getSchemaForTable('addresses');
+    const addressesFKConstraints = await getFKConstraintsForTable('addresses');
+    expect(addressesSchema).to.be.deep.equal(fixtures.addressesSchema.structure)
+    expect(addressesFKConstraints).to.be.deep.equal(fixtures.addressesSchema.foreignKey)
   })
 })

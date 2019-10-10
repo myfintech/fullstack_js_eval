@@ -21,6 +21,7 @@
     "nodemon": "^1.19.1",
     "pg": "^7.12.1",
     "pg-native": "^3.0.0",
+    "require-directory": "^2.1.1",
     "supertest": "^4.0.2"
   }
 }

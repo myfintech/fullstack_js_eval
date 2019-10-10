@@ -11,4 +11,14 @@ const database = knex({
   }
 })
 
-module.exports = { database, knex }
+const tableNames = {
+  people: 'people',
+  addresses: 'addresses',
+}
+
+
+module.exports = {
+  database,
+  knex,
+  tableNames
+}
