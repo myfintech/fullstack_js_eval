@@ -3,8 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "start": "npx nodemon src/api/"
+  },
   "author": "",
+  "contributors": [
+    "Kreig K. Zimmerman"
+  ],
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",

@@ -8,9 +8,23 @@ module.exports = (api) => {
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    database
+      .returning('id')
+      .insert({first_name: 'Xuan', last_name: 'Schmidt', birthday: '01/01/1970', company: 'MegaCorp Inc', title: 'Rude Bwoy'})
+      .into('people')
+      .catch((err) => {
+          console.error(err)
+          res
+            .type('json')
+            .status(statusCodes.InternalServerError)
+            .json({ id: 'unavailable' })
+        })
+      .then(postPerson => {
+          res
+            .type('json')
+            .status(statusCodes.OK)
+            .json({ id: postPerson })
+      })
   })
 
   /**
@@ -18,9 +32,31 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    database
+      .select('id')
+      .from('people')
+      .where('id', req.params.personID)
+      .catch((err) => {
+          console.error(err)
+          res
+            .type('json')
+            .status(statusCodes.InternalServerError)
+            .json({ result: 'unavailable' })
+        })
+      .then(getPerson => {
+          if(getPerson.length) {
+            arrId = [];
+            arrId.push(getPerson[0].id)
+            res
+              .type('json')
+              .status(statusCodes.OK)
+              .json({id: arrId})
+          } else {
+            res
+              .status(statusCodes.NotFound)
+              .end()
+          }
+      })
   })
 
   /**
@@ -28,9 +64,22 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    database
+      .select('*')
+      .from('people')
+      .catch((err) => {
+          console.error(err)
+          res
+            .type('json')
+            .status(statusCodes.InternalServerError)
+            .json({ result: 'unavailable' })
+        })
+      .then(getPeople => {
+          res
+            .type('json')
+            .status(statusCodes.OK)
+            .send(getPeople)
+      })
   })
 
   /**
