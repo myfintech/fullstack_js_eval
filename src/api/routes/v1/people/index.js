@@ -1,6 +1,7 @@
 const statusCodes = require('../../../lib/httpStatusCodes')
 const httpErrorMessages = require('../../../lib/httpErrorMessages')
 const { database } = require('../../../lib/database')
+const moment = require('moment')
 
 module.exports = (api) => {
   /**
@@ -35,6 +36,7 @@ module.exports = (api) => {
       .select('id', 'first_name', 'last_name', 'birthday', 'company', 'title')
       .from('people')
       .where('id', req.params.personID)
+      .whereNull('deleted_at')
       .then(getPerson => {
         if(getPerson.length) {
           res
@@ -63,6 +65,7 @@ module.exports = (api) => {
     database
       .select('*')
       .from('people')
+      .whereNull('deleted_at')
       .then(getPeople => {
         res
           .type('json')
@@ -116,6 +119,7 @@ module.exports = (api) => {
       .select('id', 'person_id', 'line1', 'line2', 'city', 'state', 'zip')
       .from('addresses')
       .where({'id': req.params.addressID, 'person_id': req.params.personID })
+      .whereNull('deleted_at')
       .then(getAddress => {
         if(getAddress.length) { 
           res
@@ -145,6 +149,7 @@ module.exports = (api) => {
       .select('id', 'person_id', 'line1', 'line2', 'city', 'state', 'zip')
       .from('addresses')
       .where({'person_id': req.params.personID})
+      .whereNull('deleted_at')
       .then(getAddresses => {
         res
           .type('json')
@@ -167,8 +172,21 @@ module.exports = (api) => {
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
   api.delete('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    database('addresses')
+    .returning(['id', 'deleted_at'])
+      .where({'id': req.params.addressID, 'person_id': req.params.personID })
+      .update({ deleted_at: moment().toISOString()})
+      .then(delAddress => {
+        if(delAddress.length) {
+          res
+            .type('json')
+            .status(statusCodes.OK)
+            .json(delAddress)
+        } else {
+          res
+            .status(statusCodes.NotFound)
+            .end()
+        }
+      })
   })
 }

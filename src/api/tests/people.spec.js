@@ -60,6 +60,12 @@ describe('People API', () => {
       .expect(httpStatusCodes.OK, fixtures.firstAddress)
   })
 
+  it('GET /v1/people/:personID/addresses/:addressID should return a 404 when incorrect ids are used', async () => {
+    await client
+      .get(`/v1/people/99999999/addresses/9999999`)
+      .expect(httpStatusCodes.NotFound)
+  })
+
   it('GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id', async () => {
     await client
       .get(`/v1/people/${fixtures.firstPerson.id}/addresses`)
@@ -71,6 +77,20 @@ describe('People API', () => {
   })
 
   // BONUS!!!
-  it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)')
+  it('DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)', async () => {
+    await client
+      .delete(`/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`)
+      .expect('Content-Type', fixtures.contentTypes.json)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        expect(resp.body).to.have.lengthOf.above(0)
+      })
+  })
 
+  it('DELETE /v1/people/:personID/addresses/:addressID should return a 404 when incorrect ids are used', async () => {
+    await client
+      .delete(`/v1/people/99999999/addresses/9999999`)
+      .expect(httpStatusCodes.NotFound)
+  })
+ 
 })
