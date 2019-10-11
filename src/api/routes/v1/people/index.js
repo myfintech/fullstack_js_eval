@@ -8,7 +8,7 @@ module.exports = (api) => {
    * POST /v1/people
    * Create a new person
    */
-  api.post('/', async (req, res, next) => {
+  api.post('/', (req, res) => {
     database
       .returning(['id', 'first_name', 'last_name', 'birthday', 'company', 'title'])
       .insert({first_name: 'Juan', last_name: 'Schmidt', birthday: '01/01/1970', company: 'MegaCorp Inc', title: 'Rude Bwoy'})
@@ -31,7 +31,7 @@ module.exports = (api) => {
    * GET /v1/people/:personID
    * Retrieve a person by their ID
    */
-  api.get('/:personID', async (req, res) => {
+  api.get('/:personID', (req, res) => {
     database
       .select('id', 'first_name', 'last_name', 'birthday', 'company', 'title')
       .from('people')
@@ -61,7 +61,7 @@ module.exports = (api) => {
    * GET /v1/people
    * Retrieve a list of people
    */
-  api.get('/', async (req, res) => {
+  api.get('/', (req, res) => {
     database
       .select('*')
       .from('people')
@@ -91,7 +91,7 @@ module.exports = (api) => {
    * POST /v1/people/:personID/addresses
    * Create a new address belonging to a person
    **/
-  api.post('/:personID/addresses', async (req, res) => {
+  api.post('/:personID/addresses', (req, res) => {
     database
       .returning(['id', 'person_id', 'line1', 'line2', 'city', 'state', 'zip'])
       .insert({person_id: req.params.personID, line1: '45 Main St', line2: 'Ste 404', city: 'Kennebunkport', state: 'ME', zip: '04046'})
@@ -114,7 +114,7 @@ module.exports = (api) => {
    * GET /v1/people/:personID/addresses/:addressID
    * Retrieve an address by it's addressID and personID
    **/
-  api.get('/:personID/addresses/:addressID', async (req, res) => {
+  api.get('/:personID/addresses/:addressID', (req, res) => {
     database
       .select('id', 'person_id', 'line1', 'line2', 'city', 'state', 'zip')
       .from('addresses')
@@ -144,7 +144,7 @@ module.exports = (api) => {
    * GET /v1/people/:personID/addresses
    * List all addresses belonging to a personID
    **/
-  api.get('/:personID/addresses', async (req, res) => {
+  api.get('/:personID/addresses', (req, res) => {
     database
       .select('id', 'person_id', 'line1', 'line2', 'city', 'state', 'zip')
       .from('addresses')
@@ -171,10 +171,11 @@ module.exports = (api) => {
    * Set it's deleted_at timestamp
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
-  api.delete('/:personID/addresses/:addressID', async (req, res) => {
+  api.delete('/:personID/addresses/:addressID', (req, res) => {
     database('addresses')
-    .returning(['id', 'deleted_at'])
+      .returning(['id', 'deleted_at'])
       .where({'id': req.params.addressID, 'person_id': req.params.personID })
+      .whereNull('deleted_at')
       .update({ deleted_at: moment().toISOString()})
       .then(delAddress => {
         if(delAddress.length) {
@@ -187,6 +188,12 @@ module.exports = (api) => {
             .status(statusCodes.NotFound)
             .end()
         }
+      })
+      .catch((err) => {
+        console.error(err)
+        res
+          .status(statusCodes.InternalServerError)
+          .end()
       })
   })
 }
