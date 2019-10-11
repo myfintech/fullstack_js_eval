@@ -1,6 +1,6 @@
 const statusCodes = require('../../../lib/httpStatusCodes')
-const httpErrorMessages = require('../../../lib/httpErrorMessages')
 const { database } = require('../../../lib/database')
+const moment = require('moment')
 
 module.exports = (api) => {
   /**
@@ -93,7 +93,8 @@ module.exports = (api) => {
       const [foundAddress] = await database('addresses')
         .where({
           id: Number(req.params.addressID),
-          person_id: Number(req.params.personID)
+          person_id: Number(req.params.personID),
+          deleted_at: null
         })
 
       if (!foundAddress) {
@@ -116,7 +117,8 @@ module.exports = (api) => {
     try {
       const listOfAddresses = await database('addresses')
         .where({
-          person_id: Number(req.params.personID)
+          person_id: Number(req.params.personID),
+          deleted_at: null
         })
 
       if (!listOfAddresses.length) {
@@ -138,9 +140,21 @@ module.exports = (api) => {
    * Set it's deleted_at timestamp
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
-  api.delete('/:personID/addresses/:addressID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+  api.delete('/:personID/addresses/:addressID', async (req, res, next) => {
+    try {
+      await database('addresses')
+        .where({
+          id: Number(req.params.addressID),
+          person_id: Number(req.params.personID),
+          deleted_at: null
+        })
+        .update({
+          deleted_at: moment().toISOString()
+        })
+
+      res.sendStatus(statusCodes.NoContent)
+    } catch (error) {
+      next(error)
+    }
   })
 }
