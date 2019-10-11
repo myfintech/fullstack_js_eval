@@ -8,29 +8,55 @@ module.exports = (api) => {
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const [newPerson] = await database('people')
+        .insert(req.body)
+        .returning('*')
+
+      res
+        .status(statusCodes.OK)
+        .json(newPerson)
+    } catch (error) {
+      next(error)
+    }
   })
 
   /**
    * GET /v1/people/:personID
    * Retrieve a person by their ID
    */
-  api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+  api.get('/:personID', async (req, res, next) => {
+    try {
+      const [foundPerson] = await database('people')
+        .where('id', req.params.personID)
+        .returning('*')
+
+      if (!foundPerson) {
+        res.sendStatus(statusCodes.NotFound)
+      } else {
+        res
+          .status(statusCodes.OK)
+          .json(foundPerson)
+      }
+    } catch (error) {
+      next(error)
+    }
   })
 
   /**
    * GET /v1/people
    * Retrieve a list of people
    */
-  api.get('/', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+  api.get('/', async (req, res, next) => {
+    try {
+      const listOfPeople = await database('people').select()
+
+      res
+        .status(statusCodes.OK)
+        .json(listOfPeople)
+    } catch (error) {
+      next(error)
+    }
   })
 
   /**
