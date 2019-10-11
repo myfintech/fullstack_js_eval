@@ -11,3 +11,15 @@
  * updated_at timestamp with timezone
  * deleted_at timestamp with timezone
  ***/
+
+ CREATE TABLE people(
+   id BIGSERIAL PRIMARY KEY,
+   first_name VARCHAR(256) NOT NULL,
+   last_name VARCHAR(256) NOT NULL,
+   birthday DATE NOT NULL,
+   company VARCHAR(256),
+   title VARCHAR(256),
+   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+   updated_at TIMESTAMP WITH TIME ZONE,
+   deleted_at TIMESTAMP WITH TIME ZONE
+ );
