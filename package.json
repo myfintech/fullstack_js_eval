@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npx nodemon src/api/"
+    "postversion": "git push --all && git push --tags",
+    "start:docker": "docker-compose up",
+    "start:nodemon": "npx nodemon ./src/api/",
+    "stop:docker": "docker stop $(docker ps -a -q)"
   },
   "author": "",
   "contributors": [
