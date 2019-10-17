@@ -11,3 +11,16 @@
  * updated_at timestamp with timezone
  * deleted_at timestamp with timezone
  ***/
+CREATE TABLE people
+(
+  id bigserial NOT NULL,
+  first_name varchar(256) NOT NULL,
+  last_name varchar(256) NOT NULL,
+  birthday date NOT NULL,
+  company varchar(256),
+  title varchar(256),
+  created_at timestamptz DEFAULT now() NOT NULL,
+  updated_at timestamptz,
+  deleted_at timestamptz,
+  PRIMARY KEY (id)
+);
