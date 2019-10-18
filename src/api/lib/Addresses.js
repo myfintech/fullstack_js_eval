@@ -4,8 +4,7 @@ module.exports = database => {
   return {
     /**
      * Create address for a given person
-     * @param {{personID:number, line1:string, line2:string,
-     * city:string, state:string, zip:string}} obj
+     * @param {{personID:number, line1:string, line2:string, city:string, state:string, zip:string}} obj
      * @return Inserted row with id
      */
     create: async obj => {

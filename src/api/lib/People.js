@@ -4,8 +4,7 @@ module.exports = database => {
   return {
     /**
      * Insert person into people table
-     * @param {{first_name: string,
-     * last_name:string, birthday:string, company:string, title:string}} obj
+     * @param {{first_name: string, last_name:string, birthday:string, company:string, title:string}} obj
      * @return {Promise} Inserted row with id
      */
     create: async obj => {
