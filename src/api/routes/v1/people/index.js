@@ -1,7 +1,10 @@
-const moment = require("moment");
-const statusCodes = require("../../../lib/httpStatusCodes");
-const httpErrorMessages = require("../../../lib/httpErrorMessages");
 const { database } = require("../../../lib/database");
+
+//
+const People = require("../../../lib/People")(database);
+const Addresses = require("../../../lib/Addresses")(database);
+
+const SendResponse = require("../../../lib/SendResponse");
 
 module.exports = api => {
   /**
@@ -10,23 +13,10 @@ module.exports = api => {
    */
   api.post("/", async (req, res, next) => {
     try {
-      const insertResultArray = await database("people")
-        .returning(["*"])
-        .insert({
-          first_name: req.body.first_name,
-          last_name: req.body.last_name,
-          birthday: req.body.birthday,
-          company: req.body.company,
-          title: req.body.title
-        });
-
-      const person = insertResultArray[0];
-
-      return res.status(statusCodes.OK).json(person);
+      const person = await People.create(req.body);
+      return SendResponse.json(res, person);
     } catch (error) {
-      return res
-        .status(statusCodes.InternalServerError)
-        .json({ message: "Internal Server Error" });
+      return SendResponse.error(res, error);
     }
   });
 
@@ -36,31 +26,10 @@ module.exports = api => {
    */
   api.get("/:personID", async (req, res) => {
     try {
-      if (!req.params.personID) {
-        return res
-          .status(statusCodes.BadRequest)
-          .json({ message: "Missing personID" });
-      }
-
-      const selectResultArray = await database("people")
-        .select()
-        .where({
-          id: req.params.personID
-        });
-
-      if (selectResultArray.length === 0) {
-        return res
-          .status(statusCodes.NotFound)
-          .json({ message: "Person not found." });
-      }
-
-      const person = selectResultArray[0];
-
-      return res.status(statusCodes.OK).json(person);
+      const person = await People.getById({ personID: req.params.personID });
+      return SendResponse.json(res, person);
     } catch (error) {
-      return res
-        .status(statusCodes.InternalServerError)
-        .json({ message: "Internal Server Error" });
+      return SendResponse.error(res, error);
     }
   });
 
@@ -70,13 +39,10 @@ module.exports = api => {
    */
   api.get("/", async (req, res) => {
     try {
-      const peopleArray = await database("people").whereNull("deleted_at");
-
-      return res.status(statusCodes.OK).json(peopleArray);
+      const people = await People.getAll();
+      return SendResponse.json(res, people);
     } catch (error) {
-      return res
-        .status(statusCodes.NotImplemented)
-        .json(httpErrorMessages.NotImplemented);
+      return SendResponse.error(res, error);
     }
   });
 
@@ -93,24 +59,13 @@ module.exports = api => {
    **/
   api.post("/:personID/addresses", async (req, res) => {
     try {
-      const insertResultArray = await database("addresses")
-        .returning(["*"])
-        .insert({
-          person_id: req.params.personID,
-          line1: req.body.line1,
-          line2: req.body.birthline2day,
-          city: req.body.city,
-          state: req.body.state,
-          zip: req.body.zip
-        });
-
-      const address = insertResultArray[0];
-
-      return res.status(statusCodes.OK).json(address);
+      const address = await Addresses.create({
+        ...req.body,
+        personID: req.params.personID
+      });
+      return SendResponse.json(res, address);
     } catch (error) {
-      return res
-        .status(statusCodes.InternalServerError)
-        .json({ message: "Internal Server Error" });
+      return SendResponse.error(res, error);
     }
   });
 
@@ -120,38 +75,14 @@ module.exports = api => {
    **/
   api.get("/:personID/addresses/:addressID", async (req, res) => {
     try {
-      if (!req.params.personID) {
-        return res
-          .status(statusCodes.BadRequest)
-          .json({ message: "Missing personID" });
-      }
+      const address = await Addresses.getByIdAndPeopleId({
+        addressID: req.params.addressID,
+        personID: req.params.personID
+      });
 
-      if (!req.params.addressID) {
-        return res
-          .status(statusCodes.BadRequest)
-          .json({ message: "Missing addressID" });
-      }
-
-      const selectResultArray = await database("addresses")
-        .select()
-        .where({
-          id: req.params.addressID,
-          person_id: req.params.personID
-        });
-
-      if (selectResultArray.length === 0) {
-        return res
-          .status(statusCodes.NotFound)
-          .json({ message: "Address not found." });
-      }
-
-      const address = selectResultArray[0];
-
-      return res.status(statusCodes.OK).json(address);
+      return SendResponse.json(res, address);
     } catch (error) {
-      return res
-        .status(statusCodes.InternalServerError)
-        .json({ message: "Internal Server Error" });
+      return SendResponse.error(res, error);
     }
   });
 
@@ -161,24 +92,13 @@ module.exports = api => {
    **/
   api.get("/:personID/addresses", async (req, res) => {
     try {
-      if (!req.params.personID) {
-        return res
-          .status(statusCodes.BadRequest)
-          .json({ message: "Missing personID" });
-      }
+      const addresses = await Addresses.getAll({
+        personID: req.params.personID
+      });
 
-      const addressArray = await database("addresses")
-        .select()
-        .whereNull("deleted_at")
-        .where({
-          person_id: req.params.personID
-        });
-
-      return res.status(statusCodes.OK).json(addressArray);
+      return SendResponse.json(res, addresses);
     } catch (error) {
-      return res
-        .status(statusCodes.NotImplemented)
-        .json(httpErrorMessages.NotImplemented);
+      return SendResponse.error(res, error);
     }
   });
 
@@ -191,49 +111,13 @@ module.exports = api => {
    **/
   api.delete("/:personID/addresses/:addressID", async (req, res) => {
     try {
-      if (!req.params.personID) {
-        return res
-          .status(statusCodes.BadRequest)
-          .json({ message: "Missing personID" });
-      }
-
-      if (!req.params.addressID) {
-        return res
-          .status(statusCodes.BadRequest)
-          .json({ message: "Missing addressID" });
-      }
-
-      const selectResultArray = await database("addresses")
-        .select()
-        .where({
-          id: req.params.addressID,
-          person_id: req.params.personID
-        });
-
-      if (selectResultArray.length === 0) {
-        return res
-          .status(statusCodes.NotFound)
-          .json({ message: "Address not found." });
-      }
-
-      const address = selectResultArray[0];
-
-      const updateResultBoolean = await database("addresses")
-        .where({
-          id: address.id,
-          person_id: address.person_id
-        })
-        .update({
-          deleted_at: moment().toISOString()
-        });
-
-      const deletedAddress = updateResultBoolean;
-
-      return res.status(statusCodes.OK).json(deletedAddress);
+      const isDeleted = await Addresses.remove({
+        addressID: req.params.addressID,
+        personID: req.params.personID
+      });
+      return SendResponse.json(res, isDeleted);
     } catch (error) {
-      return res
-        .status(statusCodes.InternalServerError)
-        .json({ message: "Internal Server Error" });
+      return SendResponse.error(res, error);
     }
   });
 };
