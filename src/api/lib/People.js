@@ -1,3 +1,5 @@
+const moment = require("moment");
+
 module.exports = database => {
   return {
     /**
@@ -14,7 +16,9 @@ module.exports = database => {
           last_name: obj.last_name,
           birthday: obj.birthday,
           company: obj.company,
-          title: obj.title
+          title: obj.title,
+          created_at: moment().toISOString(),
+          updated_at: moment().toISOString()
         });
 
       return insertResultArray[0];

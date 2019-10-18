@@ -17,7 +17,9 @@ module.exports = database => {
           line2: obj.birthline2day,
           city: obj.city,
           state: obj.state,
-          zip: obj.zip
+          zip: obj.zip,
+          created_at: moment().toISOString(),
+          updated_at: moment().toISOString()
         });
 
       return insertResultArray[0];
@@ -123,6 +125,7 @@ module.exports = database => {
           person_id: address.person_id
         })
         .update({
+          updated_at: moment().toISOString(),
           deleted_at: moment().toISOString()
         });
 

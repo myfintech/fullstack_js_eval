@@ -46,11 +46,11 @@ describe("People API", () => {
     await client
       .post(`/v1/people/${fixtures.firstPerson.id}/addresses`)
       .send({
-        line1: "ABC Street",
-        line2: "Suite 36",
-        city: "New York",
-        state: "NY",
-        zip: "19232"
+        line1: fixtures.firstAddress.line1,
+        line2: fixtures.firstAddress.line2,
+        city: fixtures.firstAddress.city,
+        state: fixtures.firstAddress.state,
+        zip: fixtures.firstAddress.zip
       })
       .expect(httpStatusCodes.OK)
       .then(resp => {
