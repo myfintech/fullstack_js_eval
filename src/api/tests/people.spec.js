@@ -45,13 +45,7 @@ describe("People API", () => {
   it("POST /v1/people/:personID/addresses should create a new address", async () => {
     await client
       .post(`/v1/people/${fixtures.firstPerson.id}/addresses`)
-      .send({
-        line1: fixtures.firstAddress.line1,
-        line2: fixtures.firstAddress.line2,
-        city: fixtures.firstAddress.city,
-        state: fixtures.firstAddress.state,
-        zip: fixtures.firstAddress.zip
-      })
+      .send(fixtures.firstAddress)
       .expect(httpStatusCodes.OK)
       .then(resp => {
         fixtures.firstPersonAddress = resp.body;
