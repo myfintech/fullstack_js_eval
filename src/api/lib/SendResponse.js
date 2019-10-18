@@ -16,7 +16,6 @@ module.exports = {
    * @param {Error} error
    */
   error: (res, error = {}) => {
-    console.log(error);
     switch (error.name) {
       case "NotImplemented":
         return res
