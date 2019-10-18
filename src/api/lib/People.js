@@ -56,9 +56,37 @@ module.exports = database => {
 
     return selectResultArray[0];
   }
+  /**
+   * Remove a given person from database. Soft deleted.
+   * @param {{ personID:number }} obj
+   * @param {number} obj.personID Id of the person the address belongs to
+   * @throws {InvalidArgument} Will throw if missing required arguments
+   * @throws {NotFound} Will throw error if nothing is found
+   * @return Returns number of items deleted
+   */
+  async function remove(obj) {
+    const person = await getById({
+      personID: obj.personID
+    });
+
+    const updateResultArray = await database("people")
+      .where({
+        id: person.id
+      })
+      .update(
+        {
+          updated_at: moment().toISOString(),
+          deleted_at: moment().toISOString()
+        },
+        ["id"] // Postgres returns [] if we don't do this
+      );
+
+    return updateResultArray.length;
+  }
   return {
     create,
     getAll,
-    getById
+    getById,
+    remove
   };
 };

@@ -11,7 +11,7 @@ module.exports = {
     return res.status(statusCodes.OK).json(data);
   },
   /**
-   * Resonds to request with error and json.
+   * Responds to request with error and json.
    * @param res Express res
    * @param {Error} error
    */

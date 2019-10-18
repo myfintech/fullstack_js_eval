@@ -1,6 +1,6 @@
 const { database } = require("../../../lib/database");
 
-//
+// Model functions
 const People = require("../../../lib/People")(database);
 const Addresses = require("../../../lib/Addresses")(database);
 
@@ -26,7 +26,9 @@ module.exports = api => {
    */
   api.get("/:personID", async (req, res) => {
     try {
-      const person = await People.getById({ personID: req.params.personID });
+      const person = await People.getById({
+        personID: req.params.personID
+      });
       return SendResponse.json(res, person);
     } catch (error) {
       return SendResponse.error(res, error);
@@ -41,6 +43,21 @@ module.exports = api => {
     try {
       const people = await People.getAll();
       return SendResponse.json(res, people);
+    } catch (error) {
+      return SendResponse.error(res, error);
+    }
+  });
+
+  /**
+   * DELETE /v1/people/:personID
+   * Retrieve a person by their ID
+   */
+  api.delete("/:personID", async (req, res) => {
+    try {
+      const person = await People.remove({
+        personID: req.params.personID
+      });
+      return SendResponse.json(res, person);
     } catch (error) {
       return SendResponse.error(res, error);
     }
@@ -75,7 +92,7 @@ module.exports = api => {
    **/
   api.get("/:personID/addresses/:addressID", async (req, res) => {
     try {
-      const address = await Addresses.getByIdAndPeopleId({
+      const address = await Addresses.getByIdAndPersonId({
         addressID: req.params.addressID,
         personID: req.params.personID
       });

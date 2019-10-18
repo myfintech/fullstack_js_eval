@@ -51,7 +51,7 @@ module.exports = database => {
    * @throws {NotFound} Will throw error if nothing is found
    * @return Address with matching id and person_id
    */
-  async function getByIdAndPeopleId(obj) {
+  async function getByIdAndPersonId(obj) {
     if (!obj.personID) {
       const error = new Error("Missing personID");
       error.name = "InvalidArgument";
@@ -80,37 +80,40 @@ module.exports = database => {
     return selectResultArray[0];
   }
   /**
-   * Remove a given address. Soft deleted.
+   * Remove a given address from database. Soft deleted.
    * @param {{ personID:number, addressID:number }} obj
    * @param {number} obj.personID Id of the person the address belongs to
    * @param {number} obj.addressID Requested address id
    * @throws {InvalidArgument} Will throw if missing required arguments
    * @throws {NotFound} Will throw error if nothing is found
-   * @return Returns boolean with isDeleted
+   * @return Returns number of items deleted
    */
   async function remove(obj) {
-    const address = await getByIdAndPeopleId({
+    const address = await getByIdAndPersonId({
       personID: obj.personID,
       addressID: obj.addressID
     });
 
-    const updateResultBoolean = await database("addresses")
+    const updateResultArray = await database("addresses")
       .where({
         id: address.id,
         person_id: address.person_id
       })
-      .update({
-        updated_at: moment().toISOString(),
-        deleted_at: moment().toISOString()
-      });
+      .update(
+        {
+          updated_at: moment().toISOString(),
+          deleted_at: moment().toISOString()
+        },
+        ["id"] // Postgres returns [] if we don't do this
+      );
 
-    return updateResultBoolean;
+    return updateResultArray.length;
   }
 
   return {
     create,
     getAll,
-    getByIdAndPeopleId,
+    getByIdAndPersonId,
     remove
   };
 };

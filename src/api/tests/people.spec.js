@@ -80,4 +80,13 @@ describe("People API", () => {
         expect(resp.body).to.be.equal(1);
       });
   });
+  it("DELETE /v1/people/:personID should delete a person by its id (BONUS)", async () => {
+    await client
+      .delete(`/v1/people/${fixtures.firstPerson.id}`)
+      .expect("Content-Type", fixtures.contentTypes.json)
+      .expect(httpStatusCodes.OK)
+      .then(resp => {
+        expect(resp.body).to.be.equal(1);
+      });
+  });
 });
