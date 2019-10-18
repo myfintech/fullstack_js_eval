@@ -16,7 +16,6 @@ module.exports = database => {
           birthday: obj.birthday,
           company: obj.company,
           title: obj.title,
-          created_at: moment().toISOString(),
           updated_at: moment().toISOString()
         });
 

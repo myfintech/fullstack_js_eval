@@ -17,7 +17,6 @@ module.exports = database => {
           city: obj.city,
           state: obj.state,
           zip: obj.zip,
-          created_at: moment().toISOString(),
           updated_at: moment().toISOString()
         });
 
