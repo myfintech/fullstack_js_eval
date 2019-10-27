@@ -1,14 +1,16 @@
-const knex = require('knex')
+const knex = require("knex");
+
+const dbConstants = require("./constants");
 
 const database = knex({
-  client: 'pg',
+  client: "pg",
   connection: {
     port: 5432,
-    user: 'mantl',
-    password: 'mantl',
-    hostname: 'postgres',
-    database: 'mantl'
-  }
-})
+    user: "mantl",
+    password: "mantl",
+    hostname: "postgres",
+    database: "mantl",
+  },
+});
 
-module.exports = { database, knex }
+module.exports = { database, dbConstants };
