@@ -82,7 +82,31 @@ describe("People API", () => {
   });
 
   // BONUS!!!
-  it(
-    "DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)"
-  );
+  it("DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)", async () => {
+    await client
+      .delete(
+        `/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`
+      )
+      .expect(httpStatusCodes.OK)
+      .then(res => {
+        expect(res.body).to.eql({ id: fixtures.firstAddress.id });
+      });
+  });
+
+  it("GET /v1/people/:personID/addresses/ should not return a deleted address", async () => {
+    await client
+      .get(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+      .expect(httpStatusCodes.OK)
+      .then(res => {
+        expect(res.body).to.have.lengthOf(0);
+      });
+  });
+
+  it("GET /v1/people/:personID/addresses/:addressID should not return a deleted address", async () => {
+    await client
+      .get(
+        `/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`
+      )
+      .expect(httpStatusCodes.NotFound);
+  });
 });

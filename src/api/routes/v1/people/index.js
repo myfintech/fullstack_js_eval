@@ -1,15 +1,15 @@
+const moment = require("moment");
+
 const {
   BadRequest,
   InternalServerError,
   NotFound,
-  NotImplemented,
   OK,
 } = require("../../../lib/httpStatusCodes");
 const {
   InternalServerErrorMsg,
   BadRequestMsg,
   NotFoundMsg,
-  NotImplementedMsg,
 } = require("../../../lib/httpErrorMessages");
 const { database, dbConstants } = require("../../../lib/database");
 
@@ -117,6 +117,7 @@ module.exports = api => {
         .where({
           id: params.addressID,
           person_id: params.personID,
+          deleted_at: null,
         })
         .first();
 
@@ -126,7 +127,7 @@ module.exports = api => {
 
       return res.status(NotFound).json(NotFoundMsg);
     } catch (err) {
-      console.log("POST /v1/people/:personID/addresses/addressID Error:", err);
+      console.log("GET /v1/people/:personID/addresses/addressID Error:", err);
       return res.status(BadRequest).json(BadRequestMsg);
     }
   });
@@ -142,11 +143,12 @@ module.exports = api => {
         .select("*")
         .where({
           person_id: params.personID,
+          deleted_at: null,
         });
 
       return res.status(OK).json(result);
     } catch (err) {
-      console.log("POST /v1/people/:personID/addresses Error:", err);
+      console.log("GET /v1/people/:personID/addresses Error:", err);
       return res.status(BadRequest).json(BadRequestMsg);
     }
   });
@@ -159,6 +161,22 @@ module.exports = api => {
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
   api.delete("/:personID/addresses/:addressID", async (req, res) => {
-    res.status(NotImplemented).json(NotImplementedMsg);
+    try {
+      const { params } = req;
+      const result = await database(ADDRESSES_TABLE)
+        .where({
+          id: params.addressID,
+          person_id: params.personID,
+        })
+        .update({
+          deleted_at: moment().toISOString(),
+        })
+        .returning(["id"]);
+
+      return res.status(OK).json(result[0]);
+    } catch (err) {
+      console.log("DELETE /v1/people/:personID/addresses Error:", err);
+      return res.status(BadRequest).json(BadRequestMsg);
+    }
   });
 };
