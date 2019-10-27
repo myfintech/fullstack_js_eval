@@ -1,14 +1,14 @@
 module.exports = {
-  NotImplemented: {
+  NotImplementedMsg: {
     message: "Endpoint not implemented",
   },
-  BadRequest: {
+  BadRequestMsg: {
     message: "Bad request",
   },
-  InternalServerError: {
+  InternalServerErrorMsg: {
     message: "Internal server error",
   },
-  NotFound: {
+  NotFoundMsg: {
     message: "Not found",
   },
 };

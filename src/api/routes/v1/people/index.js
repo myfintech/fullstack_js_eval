@@ -1,8 +1,19 @@
-const statusCodes = require("../../../lib/httpStatusCodes");
-const httpErrorMessages = require("../../../lib/httpErrorMessages");
+const {
+  BadRequest,
+  InternalServerError,
+  NotFound,
+  NotImplemented,
+  OK,
+} = require("../../../lib/httpStatusCodes");
+const {
+  InternalServerErrorMsg,
+  BadRequestMsg,
+  NotFoundMsg,
+  NotImplementedMsg,
+} = require("../../../lib/httpErrorMessages");
 const { database, dbConstants } = require("../../../lib/database");
 
-const { PEOPLE_TABLE } = dbConstants;
+const { ADDRESSES_TABLE, PEOPLE_TABLE } = dbConstants;
 
 module.exports = api => {
   /**
@@ -16,17 +27,13 @@ module.exports = api => {
         .returning("*");
 
       if (result && result[0]) {
-        return res.status(statusCodes.OK).json(result[0]);
+        return res.status(OK).json(result[0]);
       }
 
-      return res
-        .status(statusCodes.InternalServerError)
-        .json(httpErrorMessages.InternalServerError);
+      return res.status(InternalServerError).json(InternalServerErrorMsg);
     } catch (err) {
       console.log("POST /v1/people Error:", err);
-      return res
-        .status(statusCodes.BadRequest)
-        .json(httpErrorMessages.BadRequest);
+      return res.status(BadRequest).json(BadRequestMsg);
     }
   });
 
@@ -42,15 +49,13 @@ module.exports = api => {
         .first();
 
       if (result) {
-        return res.status(statusCodes.OK).json(result);
+        return res.status(OK).json(result);
       }
 
-      return res.status(statusCodes.NotFound).json(httpErrorMessages.NotFound);
+      return res.status(NotFound).json(NotFoundMsg);
     } catch (err) {
       console.log("GET /v1/people/:personID Error:", err);
-      return res
-        .status(statusCodes.BadRequest)
-        .json(httpErrorMessages.BadRequest);
+      return res.status(BadRequest).json(BadRequestMsg);
     }
   });
 
@@ -61,12 +66,10 @@ module.exports = api => {
   api.get("/", async (req, res) => {
     try {
       const result = await database(PEOPLE_TABLE);
-      return res.status(statusCodes.OK).json(result);
+      return res.status(OK).json(result);
     } catch (err) {
       console.log("GET /v1/people Error:", err);
-      return res
-        .status(statusCodes.InternalServerError)
-        .json(httpErrorMessages.InternalServerError);
+      return res.status(InternalServerError).json(InternalServerErrorMsg);
     }
   });
 
@@ -82,9 +85,24 @@ module.exports = api => {
    * Create a new address belonging to a person
    **/
   api.post("/:personID/addresses", async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+    try {
+      const { body, params } = req;
+      const result = await database(ADDRESSES_TABLE)
+        .insert({
+          person_id: params.personID,
+          ...body,
+        })
+        .returning("*");
+
+      if (result && result[0]) {
+        return res.status(OK).json(result[0]);
+      }
+
+      return res.status(InternalServerError).json(InternalServerErrorMsg);
+    } catch (err) {
+      console.log("POST /v1/people/:personID/addresses Error:", err);
+      return res.status(BadRequest).json(BadRequestMsg);
+    }
   });
 
   /**
@@ -92,9 +110,25 @@ module.exports = api => {
    * Retrieve an address by it's addressID and personID
    **/
   api.get("/:personID/addresses/:addressID", async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+    try {
+      const { params } = req;
+      const result = await database(ADDRESSES_TABLE)
+        .select("*")
+        .where({
+          id: params.addressID,
+          person_id: params.personID,
+        })
+        .first();
+
+      if (result) {
+        return res.status(OK).json(result);
+      }
+
+      return res.status(NotFound).json(NotFoundMsg);
+    } catch (err) {
+      console.log("POST /v1/people/:personID/addresses/addressID Error:", err);
+      return res.status(BadRequest).json(BadRequestMsg);
+    }
   });
 
   /**
@@ -102,9 +136,19 @@ module.exports = api => {
    * List all addresses belonging to a personID
    **/
   api.get("/:personID/addresses", async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+    try {
+      const { params } = req;
+      const result = await database(ADDRESSES_TABLE)
+        .select("*")
+        .where({
+          person_id: params.personID,
+        });
+
+      return res.status(OK).json(result);
+    } catch (err) {
+      console.log("POST /v1/people/:personID/addresses Error:", err);
+      return res.status(BadRequest).json(BadRequestMsg);
+    }
   });
 
   /**
@@ -115,8 +159,6 @@ module.exports = api => {
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
   api.delete("/:personID/addresses/:addressID", async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented);
+    res.status(NotImplemented).json(NotImplementedMsg);
   });
 };
