@@ -3,10 +3,18 @@ const httpStatusCodes = require("../lib/httpStatusCodes");
 const { client } = require("./setup/supertestServer");
 const { expect } = require("chai");
 
+const peopleRoute = `/v1/people`;
+const personRoute = personId =>
+  `/v1/people/${personId || fixtures.firstPerson.id}`;
+const addressesRoute = () => `/v1/people/${fixtures.firstPerson.id}/addresses`;
+const addressRoute = (personId, addressId) =>
+  `/v1/people/${personId || fixtures.firstPerson.id}/addresses/${addressId ||
+    fixtures.firstAddress.id}`;
+
 describe("People API", () => {
   it("POST /v1/people should create a new person", async () => {
     await client
-      .post("/v1/people")
+      .post(peopleRoute)
       .send(fixtures.firstPerson)
       .expect(httpStatusCodes.OK)
       .then(resp => {
@@ -16,17 +24,17 @@ describe("People API", () => {
 
   it("GET /v1/people/:personID should return a 200 with an object of the person with that id", async () => {
     await client
-      .get(`/v1/people/${fixtures.firstPerson.id}`)
+      .get(personRoute())
       .expect(httpStatusCodes.OK, fixtures.firstPerson);
   });
 
   it("GET /v1/people/:personID should return a 404 when an incorrect id is used", async () => {
-    await client.get(`/v1/people/99999999`).expect(httpStatusCodes.NotFound);
+    await client.get(personRoute("99999999")).expect(httpStatusCodes.NotFound);
   });
 
   it("GET /v1/people should return a 200 with an array of people objects", async () => {
     await client
-      .get("/v1/people")
+      .get(peopleRoute)
       .expect("Content-Type", fixtures.contentTypes.json)
       .expect(httpStatusCodes.OK)
       .then(resp => {
@@ -44,7 +52,7 @@ describe("People API", () => {
 
   it("POST /v1/people/:personID/addresses should create a new address", async () => {
     await client
-      .post(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+      .post(addressesRoute())
       .send({
         person_id: fixtures.firstPerson.id,
         ...fixtures.firstAddress,
@@ -57,22 +65,18 @@ describe("People API", () => {
 
   it("GET /v1/people/:personID/addresses/:addressID should return an address by its id and its person_id", async () => {
     await client
-      .get(
-        `/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`
-      )
+      .get(addressRoute())
       .expect("Content-Type", fixtures.contentTypes.json)
       .expect(httpStatusCodes.OK, fixtures.firstAddress);
   });
 
   it("GET /v1/people/:personID/addresses/:addressID should return a 404 when an incorrect personID is used", async () => {
-    await client
-      .get(`/v1/people/99999999/addresses/${fixtures.firstAddress.id}`)
-      .expect(httpStatusCodes.NotFound);
+    await client.get(addressRoute(99999999)).expect(httpStatusCodes.NotFound);
   });
 
   it("GET /v1/people/:personID/addresses should return a list of addresses belonging to the person by that id", async () => {
     await client
-      .get(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+      .get(addressesRoute())
       .expect("Content-Type", fixtures.contentTypes.json)
       .expect(httpStatusCodes.OK)
       .then(resp => {
@@ -84,9 +88,7 @@ describe("People API", () => {
   // BONUS!!!
   it("DELETE /v1/people/:personID/addresses/:addressID should delete an address by its id (BONUS)", async () => {
     await client
-      .delete(
-        `/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`
-      )
+      .delete(addressRoute())
       .expect(httpStatusCodes.OK)
       .then(res => {
         expect(res.body).to.eql({ id: fixtures.firstAddress.id });
@@ -95,7 +97,7 @@ describe("People API", () => {
 
   it("GET /v1/people/:personID/addresses/ should not return a deleted address", async () => {
     await client
-      .get(`/v1/people/${fixtures.firstPerson.id}/addresses`)
+      .get(addressesRoute())
       .expect(httpStatusCodes.OK)
       .then(res => {
         expect(res.body).to.have.lengthOf(0);
@@ -103,10 +105,6 @@ describe("People API", () => {
   });
 
   it("GET /v1/people/:personID/addresses/:addressID should not return a deleted address", async () => {
-    await client
-      .get(
-        `/v1/people/${fixtures.firstPerson.id}/addresses/${fixtures.firstAddress.id}`
-      )
-      .expect(httpStatusCodes.NotFound);
+    await client.get(addressRoute()).expect(httpStatusCodes.NotFound);
   });
 });
