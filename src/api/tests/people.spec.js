@@ -3,12 +3,18 @@ const httpStatusCodes = require('../lib/httpStatusCodes')
 const { client } = require('./setup/supertestServer')
 const { expect } = require('chai')
 
+function hasPersonKeys (res) {
+  const keys = ['first_name', 'last_name', 'company', 'created_at', 'id', 'title']
+  keys.map(key => { if (!res.body[key]) throw new Error(`Response missing ${key}`) })
+}
+
 describe('People API', () => {
   it('POST /v1/people should create a new person', async () => {
     await client
       .post('/v1/people')
       .send(fixtures.firstPerson)
       .expect(httpStatusCodes.OK)
+      .expect(hasPersonKeys)
       .then(resp => {
         fixtures.firstPerson = resp.body
       })
