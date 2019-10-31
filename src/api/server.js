@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const enrouten = require('express-enrouten')
 const { join } = require('path')
+const middleware = require('./lib/middleware')
 
 const parserOptions = { extended: true }
 
@@ -52,6 +53,10 @@ function createServer ({ requestLogging } = {}) {
   api.use(enrouten({
     directory: join(__dirname, 'routes')
   }))
+
+  // handle default response settings
+  // override on errors, etc
+  middleware.responseDefaults(api);
 
   api.all('*', (req, res) => {
     res.status(404).json({
