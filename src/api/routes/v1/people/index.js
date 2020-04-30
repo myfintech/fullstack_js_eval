@@ -1,16 +1,24 @@
 const statusCodes = require('../../../lib/httpStatusCodes')
 const httpErrorMessages = require('../../../lib/httpErrorMessages')
 const { database } = require('../../../lib/database')
+const moment = require('moment')
+const peopleDao = require('../../../dao/peopleDao')
+const peopleAdapters = require('../../../adapters/peopleAdapters')
 
 module.exports = (api) => {
+  const People = () => database('people')
   /**
    * POST /v1/people
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    return peopleDao.Insert(req.body)
+    .then(data => {
+      return res.status(statusCodes.OK).json(peopleAdapters.fromReqBodyWithId(data, req.body))
+    })
+    .catch(e => {
+      return res.status(statusCodes.InternalServerError).json({})
+    })
   })
 
   /**
@@ -18,9 +26,23 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+
+    const personId = req.params['personID']
+
+    return People()
+    .select()
+    .where('id', personId)
+    .then(data => {
+      const results = peopleAdapters.fromListOfDbModelsToApiModels(data)
+      if (results.length === 1) {
+        return res.status(statusCodes.OK).json(results[0])
+      }
+      return res.status(statusCodes.NotFound).json(null)
+    })
+    .catch(e => {
+      return res.status(statusCodes.InternalServerError).json({}) // Todo, real error reponses
+    })
+
   })
 
   /**
@@ -28,9 +50,15 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+
+    return People()
+    .select()
+    .then(data => {
+      return res.status(statusCodes.OK).json([...data])
+    })
+    .catch(e => {
+      return res.status(statusCodes.InternalServerError).json({})
+    })
   })
 
   /**
