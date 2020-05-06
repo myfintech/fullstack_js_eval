@@ -1,37 +1,29 @@
+const moment = require('moment')
+
 const statusCodes = require('../../../lib/httpStatusCodes')
 const httpErrorMessages = require('../../../lib/httpErrorMessages')
 const { database } = require('../../../lib/database')
+
+const { getPerson, getAllPeople, createPerson } = require('../../../controllers/people');
 
 module.exports = (api) => {
   /**
    * POST /v1/people
    * Create a new person
    */
-  api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+  api.post('/', createPerson)
 
   /**
    * GET /v1/people/:personID
    * Retrieve a person by their ID
    */
-  api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+  api.get('/:personID', getPerson)
 
   /**
    * GET /v1/people
    * Retrieve a list of people
    */
-  api.get('/', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+  api.get('/', getAllPeople)
 
   /**
    * Do not modify beyond this point until you have reached
