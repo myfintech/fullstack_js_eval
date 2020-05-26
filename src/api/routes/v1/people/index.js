@@ -28,9 +28,20 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const person = await database('people')
+      .where({ id: req.params.personID })
+      .select()
+
+    if (person.length === 0) {
+      res
+        .status(statusCodes.NotFound)
+        .end()
+
+    } else {
+      res
+        .status(statusCodes.OK)
+        .json(person[0])
+    }
   })
 
   /**
@@ -38,9 +49,12 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res) => {
+    const people = await database('people')
+      .select()
+
     res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+      .status(statusCodes.OK)
+      .json(people)
   })
 
   /**
