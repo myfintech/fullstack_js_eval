@@ -1,6 +1,8 @@
 const statusCodes = require('../../../lib/httpStatusCodes')
 const httpErrorMessages = require('../../../lib/httpErrorMessages')
 const { database } = require('../../../lib/database')
+const { PeopleRepository } = require('../../../lib/database/people')
+const { PeopleService } = require('../../../lib/services/people')
 
 module.exports = (api) => {
   /**
@@ -8,9 +10,17 @@ module.exports = (api) => {
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const repo = new PeopleRepository(database)
+      const service = new PeopleService(repo)
+      const person = await service.insert(req.body)
+
+      res
+        .status(statusCodes.OK)
+        .json(person[0])
+    } catch (e) {
+      next(e)
+    }
   })
 
   /**
@@ -18,9 +28,20 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const person = await database('people')
+      .where({ id: req.params.personID })
+      .select()
+
+    if (person.length === 0) {
+      res
+        .status(statusCodes.NotFound)
+        .end()
+
+    } else {
+      res
+        .status(statusCodes.OK)
+        .json(person[0])
+    }
   })
 
   /**
@@ -28,9 +49,12 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res) => {
+    const people = await database('people')
+      .select()
+
     res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+      .status(statusCodes.OK)
+      .json(people)
   })
 
   /**
@@ -45,9 +69,15 @@ module.exports = (api) => {
    * Create a new address belonging to a person
    **/
   api.post('/:personID/addresses', async (req, res) => {
+    req.body.person_id = req.params.personID
+
+    const addresses = await database('addresses')
+      .returning('*')
+      .insert(req.body)
+
     res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+      .status(statusCodes.OK)
+      .json(addresses[0])
   })
 
   /**
