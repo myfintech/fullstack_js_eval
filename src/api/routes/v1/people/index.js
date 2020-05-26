@@ -55,9 +55,15 @@ module.exports = (api) => {
    * Create a new address belonging to a person
    **/
   api.post('/:personID/addresses', async (req, res) => {
+    req.body.person_id = req.params.personID
+
+    const addresses = await database('addresses')
+      .returning('*')
+      .insert(req.body)
+
     res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+      .status(statusCodes.OK)
+      .json(addresses[0])
   })
 
   /**
