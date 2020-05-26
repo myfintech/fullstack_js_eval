@@ -1,6 +1,8 @@
 const statusCodes = require('../../../lib/httpStatusCodes')
 const httpErrorMessages = require('../../../lib/httpErrorMessages')
 const { database } = require('../../../lib/database')
+const { PeopleRepository } = require('../../../lib/database/people')
+const { PeopleService } = require('../../../lib/services/people')
 
 module.exports = (api) => {
   /**
@@ -8,9 +10,17 @@ module.exports = (api) => {
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    try {
+      const repo = new PeopleRepository(database)
+      const service = new PeopleService(repo)
+      const person = await service.insert(req.body)
+
+      res
+        .status(statusCodes.OK)
+        .json(person[0])
+    } catch (e) {
+      next(e)
+    }
   })
 
   /**
