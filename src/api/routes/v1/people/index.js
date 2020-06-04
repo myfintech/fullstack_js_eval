@@ -8,9 +8,14 @@ module.exports = (api) => {
    * Create a new person
    */
   api.post('/', async (req, res, next) => {
+    const person = await database('people')
+      .insert(req.body)
+      .returning('*')
+
+    // todo: take a second look...
     res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+      .status(statusCodes.OK)
+      .json(person[0])
   })
 
   /**
@@ -18,9 +23,17 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const person = await database('people')
+      .where({id: req.params.personID})
+      .first()
+
+    if (person) {
+      res
+        .status(statusCodes.OK)
+        .json(person)  
+    } else {
+      res.sendStatus(statusCodes.NotFound)
+    }
   })
 
   /**
@@ -28,9 +41,9 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+    const people  = await database('people')
+      .select('*')
+    res.status(statusCodes.OK).json(people)
   })
 
   /**
@@ -45,9 +58,13 @@ module.exports = (api) => {
    * Create a new address belonging to a person
    **/
   api.post('/:personID/addresses', async (req, res) => {
+    const address = await database('addresses')
+      .insert({ person_id: req.params.personID, ...req.body })
+      .returning('*')
+
     res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
+      .status(statusCodes.OK)
+      .json(address[0])
   })
 
   /**
