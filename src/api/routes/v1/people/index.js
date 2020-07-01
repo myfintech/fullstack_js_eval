@@ -1,37 +1,45 @@
-const statusCodes = require('../../../lib/httpStatusCodes')
-const httpErrorMessages = require('../../../lib/httpErrorMessages')
-const { database } = require('../../../lib/database')
+const statusCodes = require("../../../lib/httpStatusCodes");
+const httpErrorMessages = require("../../../lib/httpErrorMessages");
+const { database } = require("../../../lib/database");
 
 module.exports = (api) => {
   /**
    * POST /v1/people
    * Create a new person
    */
-  api.post('/', async (req, res, next) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+  api.post("/", async (req, res, next) => {
+    const newPerson = await database("people").returning("*").insert(req.body);
+
+    res.status(statusCodes.OK).json(newPerson[0]);
+  });
 
   /**
    * GET /v1/people/:personID
    * Retrieve a person by their ID
    */
-  api.get('/:personID', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+  api.get("/:personID", async (req, res) => {
+    const personMatch = await database("people")
+      .where({
+        id: req.params.personID,
+      })
+      .first();
+
+    if (!personMatch) {
+      res.sendStatus(statusCodes.NotFound);
+    }
+
+    res.status(statusCodes.OK).json(personMatch);
+  });
 
   /**
    * GET /v1/people
    * Retrieve a list of people
    */
-  api.get('/', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+  api.get("/", async (req, res) => {
+    const allPeople = await database("people").select("*");
+
+    res.status(statusCodes.OK).json(allPeople);
+  });
 
   /**
    * Do not modify beyond this point until you have reached
@@ -44,31 +52,33 @@ module.exports = (api) => {
    * POST /v1/people/:personID/addresses
    * Create a new address belonging to a person
    **/
-  api.post('/:personID/addresses', async (req, res) => {
-    res
-      .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+  api.post("/:personID/addresses", async (req, res) => {
+    const newAddress = await database("addresses")
+      .returning("*")
+      .insert({ ...req.body, person_id: req.params.personID });
+
+    res.status(statusCodes.OK).json(newAddress[0]);
+  });
 
   /**
    * GET /v1/people/:personID/addresses/:addressID
    * Retrieve an address by it's addressID and personID
    **/
-  api.get('/:personID/addresses/:addressID', async (req, res) => {
+  api.get("/:personID/addresses/:addressID", async (req, res) => {
     res
       .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+      .json(httpErrorMessages.NotImplemented);
+  });
 
   /**
    * GET /v1/people/:personID/addresses
    * List all addresses belonging to a personID
    **/
-  api.get('/:personID/addresses', async (req, res) => {
+  api.get("/:personID/addresses", async (req, res) => {
     res
       .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
+      .json(httpErrorMessages.NotImplemented);
+  });
 
   /**
    * BONUS!!!!
@@ -77,9 +87,9 @@ module.exports = (api) => {
    * Set it's deleted_at timestamp
    * Update the previous GET endpoints to omit rows where deleted_at is not null
    **/
-  api.delete('/:personID/addresses/:addressID', async (req, res) => {
+  api.delete("/:personID/addresses/:addressID", async (req, res) => {
     res
       .status(statusCodes.NotImplemented)
-      .json(httpErrorMessages.NotImplemented)
-  })
-}
+      .json(httpErrorMessages.NotImplemented);
+  });
+};
