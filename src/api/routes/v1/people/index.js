@@ -7,10 +7,17 @@ module.exports = (api) => {
    * POST /v1/people
    * Create a new person
    */
-  api.post('/', async (req, res, next) => {
+  api.post ('/', async (req, res, next) => {
+    try {
+      let person = req.body
+      let returnVal = await database('people').insert(person, '*')
+      res.status(200).json(returnVal[0])
+    } catch(err){
+      console.log('err', err)
     res
       .status(statusCodes.NotImplemented)
       .json(httpErrorMessages.NotImplemented)
+    }
   })
 
   /**
@@ -18,9 +25,19 @@ module.exports = (api) => {
    * Retrieve a person by their ID
    */
   api.get('/:personID', async (req, res) => {
+    try {
+      let personID = req.params.personID
+      let person = await database('people').select('*').where('id', personID)
+      if(person[0]){
+      res.status(200).json(person[0])
+      } else {
+        res.status(404).send('Not Found')
+      }
+    } catch (err){
     res
       .status(statusCodes.NotImplemented)
       .json(httpErrorMessages.NotImplemented)
+    }
   })
 
   /**
@@ -28,9 +45,14 @@ module.exports = (api) => {
    * Retrieve a list of people
    */
   api.get('/', async (req, res) => {
+    try {
+     let people = await database('people').select('*')
+     res.status(200).send(people)
+    } catch(err){
     res
       .status(statusCodes.NotImplemented)
       .json(httpErrorMessages.NotImplemented)
+  }
   })
 
   /**
