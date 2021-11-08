@@ -1,11 +1,10 @@
-FROM node:10-stretch
+FROM node:16-buster
 
 WORKDIR /opt/app
 
 RUN apt-get update && \
     apt-get install -y \
-  	build-essential \
-		postgresql-client-9.6
+		postgresql-client
 
 # Install Monarch
 RUN curl -o /usr/local/bin/monarch https://cdn.mantl.team/assets/binaries/monarch/linux-8790d0f \
